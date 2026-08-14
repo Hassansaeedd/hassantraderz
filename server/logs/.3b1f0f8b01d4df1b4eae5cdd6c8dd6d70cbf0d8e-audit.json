@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "D:\\mobile shop pos system + inventory and sales management system\\server\\logs\\.3b1f0f8b01d4df1b4eae5cdd6c8dd6d70cbf0d8e-audit.json",
+    "files": [
+        {
+            "date": 1785328329296,
+            "name": "D:\\mobile shop pos system + inventory and sales management system\\server\\logs\\error-2026-07-29.log",
+            "hash": "fe4a187d495285ec16305bdc359dc9bf8485b4608492e2232c5dcecc5af438ba"
+        },
+        {
+            "date": 1786706672204,
+            "name": "D:\\mobile shop pos system + inventory and sales management system\\server\\logs\\error-2026-08-14.log",
+            "hash": "900733db67fd6842451a90067c277c473a2b95d7153101adf6edf30aca379f60"
+        }
+    ],
+    "hashType": "sha256"
+}

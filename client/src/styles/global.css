@@ -1,0 +1,175 @@
+/* client/src/styles/global.css — Premium Glassmorphic Minimalist Design System */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:          #080d1a;
+  --bg-container:     rgba(15, 23, 42, 0.75);
+  --bg-elevated:      rgba(30, 41, 59, 0.65);
+  --border:           rgba(255, 255, 255, 0.08);
+  --border-glow:      rgba(16, 185, 129, 0.4);
+  --primary:          #10b981;
+  --primary-hover:    #059669;
+  --accent-cyan:      #06b6d4;
+  --accent-emerald:   #34d399;
+  --success:          #10b981;
+  --warning:          #f59e0b;
+  --danger:           #ef4444;
+  --text:             #f8fafc;
+  --text-muted:       #94a3b8;
+  --shadow:           0 20px 50px rgba(0, 0, 0, 0.5);
+  --radius:           12px;
+  --glass-bg:         rgba(15, 23, 42, 0.75);
+  --glass-border:     1px solid rgba(255, 255, 255, 0.08);
+  --header-bg:        rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="light"] {
+  --bg-base:          #f1f5f9;
+  --bg-container:     rgba(255, 255, 255, 0.85);
+  --bg-elevated:      rgba(241, 245, 249, 0.9);
+  --border:           rgba(0, 0, 0, 0.08);
+  --border-glow:      rgba(16, 185, 129, 0.3);
+  --primary:          #059669;
+  --primary-hover:    #047857;
+  --accent-cyan:      #0284c7;
+  --accent-emerald:   #059669;
+  --success:          #10b981;
+  --warning:          #d97706;
+  --danger:           #dc2626;
+  --text:             #0f172a;
+  --text-muted:       #64748b;
+  --shadow:           0 10px 30px rgba(0, 0, 0, 0.06);
+  --radius:           12px;
+  --glass-bg:         rgba(255, 255, 255, 0.85);
+  --glass-border:     1px solid rgba(0, 0, 0, 0.08);
+  --header-bg:        rgba(255, 255, 255, 0.9);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-base) url('/bg_tech.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glass Backdrop Blur */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(8, 13, 26, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-theme="light"] body::before {
+  background: rgba(241, 245, 249, 0.9);
+}
+
+/* Urdu RTL mode */
+html[dir="rtl"] body {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+#root { height: 100%; position: relative; z-index: 1; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Glassmorphism Cards */
+.ant-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: var(--glass-border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ant-card:hover {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Modern Minimalist KPI Cards */
+.kpi-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 14px 35px rgba(16, 185, 129, 0.15);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--primary), var(--accent-cyan));
+}
+
+.kpi-card.success::before { background: linear-gradient(180deg, #10b981, #059669); }
+.kpi-card.warning::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.kpi-card.danger::before  { background: linear-gradient(180deg, #ef4444, #dc2626); }
+
+/* Glass Sidebar Styling */
+.glass-sidebar {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="light"] .glass-sidebar {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Sidebar Custom Nav Items */
+.sidebar-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; margin: 4px 10px;
+  border-radius: 10px; cursor: pointer;
+  color: var(--text-muted); font-weight: 500; font-size: 13.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav-item.active {
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.15));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }

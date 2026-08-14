@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "D:\\mobile shop pos system + inventory and sales management system\\server\\logs\\.3ebe263e5197022942e82247c664ae4509b35978-audit.json",
+    "files": [
+        {
+            "date": 1786706672209,
+            "name": "D:\\mobile shop pos system + inventory and sales management system\\server\\logs\\combined-2026-08-14.log",
+            "hash": "7da873d0d7d29372984cd7ed7632b224e2e8de525be261677f46046a4c9e483f"
+        }
+    ],
+    "hashType": "sha256"
+}

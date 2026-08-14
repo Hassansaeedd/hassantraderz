@@ -1,0 +1,358 @@
+// server/prisma/schema.prisma — Zero-Config SQLite Schema
+// Runs locally without installing any database software (PostgreSQL/MySQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// USERS & AUTH
+// ═════════════════════════════════════════════════════════════════════════════
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String?  @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         String   @default("CASHIER") // ADMIN, MANAGER, CASHIER
+  status       String   @default("ACTIVE")  // ACTIVE, INACTIVE
+  avatar       String?
+  language     String   @default("EN")      // EN, UR
+
+  sales          Sale[]
+  purchases      Purchase[]
+  stockMovements StockMovement[]
+  refreshTokens  RefreshToken[]
+  activityLogs   ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  entity      String?
+  entityId    String?
+  description String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PRODUCT CATALOG
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Category {
+  id          String    @id @default(cuid())
+  nameEn      String
+  nameUr      String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  logo     String?
+  isActive Boolean   @default(true)
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("brands")
+}
+
+model Product {
+  id            String  @id @default(cuid())
+  nameEn        String
+  nameUr        String?
+  sku           String  @unique
+  barcode       String? @unique
+  descriptionEn String?
+  descriptionUr String?
+  image         String?
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  brandId    String?
+  brand      Brand?   @relation(fields: [brandId], references: [id])
+
+  purchasePrice Float
+  sellingPrice  Float
+  gstRate       Float   @default(17.0)
+  gstInclusive  Boolean @default(false)
+
+  minStockLevel Int     @default(5)
+  currentStock  Int     @default(0)
+  isActive      Boolean @default(true)
+
+  variants       ProductVariant[]
+  saleItems      SaleItem[]
+  purchaseItems  PurchaseItem[]
+  stockMovements StockMovement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  nameEn     String
+  nameUr     String?
+  sku        String? @unique
+  barcode    String? @unique
+  priceDelta Float   @default(0)
+  stock      Int     @default(0)
+
+  @@map("product_variants")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// CUSTOMERS & SUPPLIERS
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Customer {
+  id                 String   @id @default(cuid())
+  name               String
+  phone              String?  @unique
+  email              String?
+  address            String?
+  city               String?
+  cnic               String?
+  creditLimit        Float    @default(0)
+  outstandingBalance Float    @default(0)
+  loyaltyPoints      Int      @default(0)
+  isActive           Boolean  @default(true)
+  notes              String?
+
+  sales Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customers")
+}
+
+model Supplier {
+  id                 String   @id @default(cuid())
+  name               String
+  company            String?
+  phone              String?
+  email              String?
+  address            String?
+  city               String?
+  ntn                String?
+  strn               String?
+  paymentTerms       Int      @default(30)
+  outstandingBalance Float    @default(0)
+  isActive           Boolean  @default(true)
+  notes              String?
+
+  purchases Purchase[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("suppliers")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PURCHASES
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Purchase {
+  id             String    @id @default(cuid())
+  purchaseNumber String    @unique
+  supplierId     String
+  supplier       Supplier  @relation(fields: [supplierId], references: [id])
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+
+  status         String    @default("DRAFT") // DRAFT, ORDERED, PARTIALLY_RECEIVED, RECEIVED, CANCELLED
+  purchaseDate   DateTime  @default(now())
+  expectedDate   DateTime?
+  receivedDate   DateTime?
+
+  subtotal       Float     @default(0)
+  gstAmount      Float     @default(0)
+  discountAmount Float     @default(0)
+  totalAmount    Float     @default(0)
+  paidAmount     Float     @default(0)
+  dueAmount      Float     @default(0)
+
+  supplierInvoiceNo String?
+  notes             String?
+
+  items    PurchaseItem[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id         String   @id @default(cuid())
+  purchaseId String
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+
+  quantity    Int
+  receivedQty Int     @default(0)
+  unitCost    Float
+  gstRate     Float   @default(17.0)
+  gstAmount   Float   @default(0)
+  totalAmount Float
+
+  @@map("purchase_items")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SALES
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Sale {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+
+  status        String    @default("COMPLETED") // COMPLETED, RETURNED, PARTIALLY_RETURNED, CANCELLED, HELD
+  saleDate      DateTime  @default(now())
+
+  subtotal       Float
+  gstAmount      Float    @default(0)
+  discountAmount Float    @default(0)
+  totalAmount    Float
+  paidAmount     Float
+  changeAmount   Float    @default(0)
+  dueAmount      Float    @default(0)
+
+  paymentMethod String    @default("CASH") // CASH, CARD, EASYPAISA, JAZZCASH, BANK_TRANSFER, CREDIT
+  paymentRef    String?
+  notes         String?
+  offlineId     String?   @unique
+  syncedAt      DateTime?
+
+  items    SaleItem[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity    Int
+  returnedQty Int     @default(0)
+  unitPrice   Float
+  discountPct Float   @default(0)
+  discountAmt Float   @default(0)
+  gstRate     Float
+  gstAmount   Float   @default(0)
+  totalAmount Float
+
+  @@map("sale_items")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PAYMENTS & STOCK MOVEMENTS
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Payment {
+  id         String    @id @default(cuid())
+  saleId     String?
+  sale       Sale?     @relation(fields: [saleId], references: [id])
+  purchaseId String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id])
+
+  amount    Float
+  method    String
+  reference String?
+  paidAt    DateTime  @default(now())
+  notes     String?
+
+  createdAt DateTime  @default(now())
+
+  @@map("payments")
+}
+
+model StockMovement {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  type          String   // PURCHASE_IN, SALE_OUT, RETURN_IN, ADJUSTMENT_IN, ADJUSTMENT_OUT
+  quantity      Int
+  balanceBefore Int
+  balanceAfter  Int
+  referenceId   String?
+  referenceType String?
+  reason        String?
+
+  createdAt DateTime @default(now())
+
+  @@map("stock_movements")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  group String @default("general")
+
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}

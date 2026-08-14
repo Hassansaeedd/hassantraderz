@@ -1,0 +1,101 @@
+nameEn,nameUr,sku,barcode,purchasePrice,sellingPrice,currentStock,minStockLevel
+Samsung Galaxy S24 Ultra 512GB,سیمسنگ S24 الٹرا,MOB-S24U-512,880609500001,390000,425000,5,2
+Samsung Galaxy S24 Plus 256GB,سیمسنگ S24 پلس,MOB-S24P-256,880609500002,280000,310000,4,2
+Samsung Galaxy A55 5G 256GB,سیمسنگ A55,MOB-A55-256,880609500003,115000,130000,8,3
+Samsung Galaxy A35 5G 128GB,سیمسنگ A35,MOB-A35-128,880609500004,82000,92000,10,3
+Samsung Galaxy A15 128GB,سیمسنگ A15,MOB-A15-128,880609500005,42000,48000,15,4
+Samsung Galaxy A05s 128GB,سیمسنگ A05s,MOB-A05S-128,880609500006,31000,35500,12,4
+Samsung Galaxy A05 64GB,سیمسنگ A05,MOB-A05-64,880609500007,24500,28000,15,5
+iPhone 15 Pro Max 256GB Natural Titanium,آئی فون 15 پرو میکس,MOB-IP15PM-256,194253000008,480000,520000,3,1
+iPhone 15 Pro 128GB Blue Titanium,آئی فون 15 پرو,MOB-IP15P-128,194253000009,410000,445000,4,1
+iPhone 15 128GB Black,آئی فون 15,MOB-IP15-128,194253000010,295000,325000,5,2
+iPhone 14 128GB Midnight,آئی فون 14,MOB-IP14-128,194253000011,235000,258000,6,2
+iPhone 13 128GB Starlight,آئی فون 13,MOB-IP13-128,194253000012,195000,215000,8,3
+Xiaomi Redmi Note 13 Pro+ 512GB,ریڈمی نوٹ 13 پرو پلس,MOB-RN13PP-512,694181000013,118000,132000,6,2
+Xiaomi Redmi Note 13 Pro 256GB,ریڈمی نوٹ 13 پرو,MOB-RN13P-256,694181000014,68000,76000,10,3
+Xiaomi Redmi Note 13 128GB,ریڈمی نوٹ 13,MOB-RN13-128,694181000015,46000,52000,12,4
+Xiaomi Redmi 13C 128GB,ریڈمی 13C,MOB-R13C-128,694181000016,285000,32500,20,5
+Xiaomi Redmi A3 64GB,ریڈمی A3,MOB-RA3-64,694181000017,19500,22500,15,5
+Infinix Note 40 Pro 256GB,انفینکس نوٹ 40 پرو,MOB-INF-N40P,489494700018,62000,69999,10,3
+Infinix Note 40 256GB,انفینکس نوٹ 40,MOB-INF-N40,489494700019,48000,54999,12,3
+Infinix Hot 40 Pro 256GB,انفینکس ہاٹ 40 پرو,MOB-INF-H40P,489494700020,40000,45999,15,4
+Infinix Hot 40i 128GB,انفینکس ہاٹ 40i,MOB-INF-H40I,489494700021,26500,30500,18,5
+Infinix Smart 8 64GB,انفینکس سمارٹ 8,MOB-INF-SM8,489494700022,20000,23000,20,5
+Tecno Camon 30 Pro 5G,ٹیکنو کیمن 30 پرو,MOB-TEC-C30P,489518000023,85000,96000,6,2
+Tecno Camon 30 256GB,ٹیکنو کیمن 30,MOB-TEC-C30,489518000024,52000,58999,10,3
+Tecno Spark 20 Pro+ 256GB,ٹیکنو سپارک 20 پرو پلس,MOB-TEC-S20PP,489518000025,48000,54500,10,3
+Tecno Spark 20 128GB,ٹیکنو سپارک 20,MOB-TEC-S20,489518000026,31000,35500,15,4
+Tecno Pop 8 64GB,ٹیکنو پاپ 8,MOB-TEC-P8,489518000027,20500,23500,20,5
+Vivo V30 5G 256GB,ویوو V30,MOB-VIV-V30,693511000028,122000,139999,6,2
+Vivo V30e 256GB,ویوو V30e,MOB-VIV-V30E,693511000029,80000,89999,8,3
+Vivo Y27s 128GB,ویوو Y27s,MOB-VIV-Y27S,693511000030,44000,49999,10,3
+Vivo Y17s 128GB,ویوو Y17s,MOB-VIV-Y17S,693511000031,34000,38999,12,4
+Vivo Y03 64GB,ویوو Y03,MOB-VIV-Y03,693511000032,22500,25999,15,5
+Oppo Reno 11 5G 256GB,اوپو رینو 11,MOB-OPP-R11,693216000033,114000,129999,5,2
+Oppo Reno 11F 5G,اوپو رینو 11F,MOB-OPP-R11F,693216000034,70000,79999,8,3
+Oppo A78 128GB,اوپو A78,MOB-OPP-A78,693216000035,52000,58999,10,3
+Oppo A58 128GB,اوپو A58,MOB-OPP-A58,693216000036,41000,46999,12,4
+Oppo A18 128GB,اوپو A18,MOB-OPP-A18,693216000037,30000,34500,15,4
+Realme 12 Pro+ 5G,ریئل می 12 پرو پلس,MOB-RLM-12PP,697169000038,125000,139999,4,2
+Realme 12+ 5G 256GB,ریئل می 12 پلس,MOB-RLM-12P,697169000039,66000,74999,8,3
+Realme C67 128GB,ریئل می C67,MOB-RLM-C67,697169000040,36000,41999,12,4
+Realme C53 128GB,ریئل می C53,MOB-RLM-C53,697169000041,31000,35999,15,4
+Realme Note 50 64GB,ریئل می نوٹ 50,MOB-RLM-N50,697169000042,20000,22999,20,5
+Apple AirPods Pro 2nd Gen Type-C,ایئرپاڈز پرو 2,ACC-APP2-01,194253100043,58000,68000,10,3
+Apple AirPods 3rd Gen,ایئرپاڈز 3,ACC-AP3-02,194253100044,42000,49000,8,2
+Samsung Galaxy Buds 2 Pro,سیمسنگ بڈز 2 پرو,ACC-SGB2P-03,880609200045,32000,38000,8,2
+Anker 65W Fast Wall Charger GaN,اینکر 65 واٹ چارجر,ACC-ANK-65W,848061000046,7500,9500,15,4
+Anker 20W PD Type-C iPhone Charger,اینکر 20 واٹ آئی فون چارجر,ACC-ANK-20W,848061000047,3200,4200,25,5
+Anker PowerCore 20000mAh Power Bank,اینکر پاور بینک,ACC-ANK-PB20,848061000048,9500,12500,12,3
+Baseus 65W Power Bank 30000mAh,بیسس 30000 ایم اے ایچ پاور بینک,ACC-BAS-PB30,695315600049,11500,14500,10,3
+Baseus 100W Fast Charging Cable Type-C,بیسس ٹائپ سی کیبل,ACC-BAS-100W,695315600050,1400,2200,35,8
+Baseus iPhone Lightning Fast Cable 2m,بیسس آئی فون کیبل,ACC-BAS-IP2M,695315600051,1200,1850,40,8
+Ronin R-970 Wireless Neckband,رونن وائرلیس نیک بینڈ,ACC-RON-R970,894512000052,3400,4800,20,5
+Ronin R-520 Gaming Earbuds,رونن گیمنگ ایئر بڈز,ACC-RON-R520,894512000053,3800,5200,25,5
+Ronin R-730 Smart Watch,رونن سمارٹ واچ,ACC-RON-R730,894512000054,5500,7800,15,4
+Audionic Airbud 425 Wireless Earbuds,آڈیونک ایئر بڈز,ACC-AUD-425,894102000055,3200,4500,30,6
+Audionic BlueBeats B-888 Wireless Headset,آڈیونک ہیڈ فون,ACC-AUD-B888,894102000056,4100,5900,15,4
+Audionic Sugar 20 Portable Bluetooth Speaker,آڈیونک سپیکر,ACC-AUD-SUG20,894102000057,2800,3900,12,3
+Joyroom JR-T03S Pro Earbuds,جوائے روم ایئر بڈز,ACC-JOY-T03S,694123000058,4500,6200,20,5
+Joyroom 20W PD Car Charger Dual Port,جوائے روم کار چارجر,ACC-JOY-CAR20,694123000059,1600,2400,25,5
+Joyroom Magnetic Car Phone Mount Holder,جوائے روم کار ہولڈر,ACC-JOY-MOUNT,694123000060,1800,2700,20,4
+Remax Lesu 3-in-1 Charging Cable,ری میکس 3-ان-1 کیبل,ACC-RMX-3IN1,695420000061,850,1400,45,10
+Remax 10000mAh Compact Powerbank,ری میکس پاور بینک,ACC-RMX-PB10,695420000062,3200,4600,20,5
+Faster Freedom Wireless Bluetooth Earbuds,فاسٹر ایئر بڈز,ACC-FST-FRD,894800000063,2600,3800,30,6
+Faster 65W Super Fast Wall Charger,فاسٹر 65 واٹ چارجر,ACC-FST-65W,894800000064,2800,4200,25,5
+Zero Lifestyle Terra Smartwatch AMOLED,زیرو لائف سٹائل واچ,ACC-ZERO-TER,894900000065,6500,8999,12,3
+Zero Lifestyle Buzz Bluetooth Calling Watch,زیرو بز واچ,ACC-ZERO-BUZ,894900000066,4800,6999,15,4
+Samsung Original 25W Type-C Super Fast Charger,سیمسنگ 25 واٹ چارجر,ACC-SAM-25W,880609900067,3400,4800,30,8
+Samsung Original 45W Type-C Power Adapter,سیمسنگ 45 واٹ چارجر,ACC-SAM-45W,880609900068,5200,7200,20,5
+Apple Original 20W USB-C Power Adapter,آئی فون 20 واٹ چارجر,ACC-AP-20W,194253200069,4500,6200,35,8
+Apple Magsafe Battery Pack Wireless,آئی فون میگ سیف,ACC-AP-MAGPB,194253200070,8500,11500,10,3
+Matte 9D Glass Screen Protector iPhone 15 Pro,9D میٹ گلاس 15 پرو,ACC-PROT-IP15P,794100000071,150,450,100,20
+Super D Curved UV Glass Protector Galaxy S24 Ultra,یو وی کروڈ گلاس S24,ACC-PROT-S24U,794100000072,350,850,50,10
+9D Glass Screen Protector Samsung A15/A35,9D گلاس سیمسنگ,ACC-PROT-SAMA,794100000073,100,300,150,25
+9D Glass Screen Protector Redmi Note 13,9D گلاس ریڈمی,ACC-PROT-RN13,794100000074,100,300,150,25
+Transparent Silicone Clear Case iPhone 15 Pro,شفاف سلیکون کور آئی فون,ACC-CASE-IP15,794100000075,120,350,80,15
+MagSafe Armor Magnetic Case iPhone 14/15,میگ سیف آرمور کور,ACC-CASE-MAG,794100000076,350,950,50,10
+Premium Leather Wallet Flip Cover Galaxy S24,لیڈر والیٹ فلپ کور,ACC-CASE-S24W,794100000077,450,1200,30,5
+Heavy Duty Shockproof Armor Case Redmi Note 13,شاک پروف کور ریڈمی,ACC-CASE-RN13,794100000078,250,650,60,10
+Used iPhone 13 128GB PTA Approved (Grade A),استعمال شدہ آئی فون 13,USD-IP13-128,358000000079,150000,168000,4,1
+Used iPhone 12 128GB JV Non-PTA (Grade A),استعمال شدہ آئی فون 12,USD-IP12-128,358000000080,72000,84000,6,2
+Used iPhone 11 64GB PTA Approved (Grade B),استعمال شدہ آئی فون 11,USD-IP11-64,358000000081,85000,98000,5,2
+Used Samsung Galaxy S21 Ultra 5G 256GB,استعمال شدہ سیمسنگ S21 الٹرا,USD-S21U-256,358000000082,135000,152000,3,1
+Used Samsung Galaxy S20 FE 128GB,استعمال شدہ سیمسنگ S20 FE,USD-S20FE-128,358000000083,52000,62000,5,2
+Used OnePlus 9 Pro 5G 256GB (Non-PTA),استعمال شدہ ون پلس 9 پرو,USD-OP9P-256,358000000084,68000,79000,4,1
+Used Google Pixel 6a 128GB Official PTA,استعمال شدہ گوگل پکسل 6a,USD-PIX6A-128,358000000085,58000,68000,6,2
+Used Google Pixel 7 Pro 128GB Softbank,استعمال شدہ گوگل پکسل 7 پرو,USD-PIX7P-128,358000000086,95000,112000,3,1
+iPhone 11 Replacement Screen Display Assembly,آئی فون 11 ڈسپلے سکرین,REP-DISP-IP11,994100000087,8500,12500,8,2
+iPhone 12/12 Pro OLED Display Panel Original,آئی فون 12 اولیڈ سکرین,REP-DISP-IP12,994100000088,18500,24500,5,1
+Samsung A54 5G AMOLED Screen Panel Original,سیمسنگ A54 اولیڈ سکرین,REP-DISP-A55,994100000089,14500,19500,6,2
+Redmi Note 13 OLED Display Assembly,ریڈمی نوٹ 13 سکرین,REP-DISP-RN13,994100000090,7500,11000,8,2
+iPhone 11 Battery Replacement High Capacity 3110mAh,آئی فون 11 بیٹری,REP-BAT-IP11,994100000091,3200,4800,15,3
+iPhone 12 Battery Replacement Original 2815mAh,آئی فون 12 بیٹری,REP-BAT-IP12,994100000092,3800,5500,12,3
+iPhone 13 Battery Replacement 3227mAh,آئی فون 13 بیٹری,REP-BAT-IP13,994100000093,4500,6500,10,2
+Samsung A15/A25 Battery 5000mAh Original,سیمسنگ 5000 ایم اے ایچ بیٹری,REP-BAT-SAMA,994100000094,2200,3400,15,4
+Redmi 13C / Poco C65 Battery 5000mAh,ریڈمی 5000 ایم اے ایچ بیٹری,REP-BAT-RN13C,994100000095,2000,3100,15,4
+Type-C Charging Port Connector Board iPhone 15,آئی فون 15 ٹائپ سی چارجنگ بورڈ,REP-CHG-IP15,994100000096,2800,4200,10,2
+Type-C Charging Sub Board Samsung A54/A35,سیمسنگ چارجنگ بورڈ,REP-CHG-SAMA,994100000097,1200,2200,20,4
+Universal SIM Tray Ejector Pin Metal (Pack of 50),سم پن پیک,REP-SIM-PIN,994100000098,300,750,30,5
+UV Glue Adhesive 10ml for Curved Glass Repair,یو وی گلو,REP-GLU-UV,994100000099,400,850,25,5
+B7000 Adhesive Glue 110ml Screen Repair,B7000 سکرین گلو,REP-GLU-B7000,994100000100,500,1100,20,4
