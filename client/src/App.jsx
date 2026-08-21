@@ -1,9 +1,8 @@
-// client/src/App.jsx — Global App with Interactive Particles Background
+// client/src/App.jsx — Clean Global App Layout
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { App as AntApp } from 'antd';
 import AppRouter from './router/AppRouter';
-import ParticlesBackground from './components/common/ParticlesBackground';
 import { useTranslation } from 'react-i18next';
 import { syncPendingSales } from './utils/offlineQueue';
 import api from './api/axiosInstance';
@@ -32,7 +31,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <AntApp>
-        <ParticlesBackground />
         <AppRouter />
       </AntApp>
     </BrowserRouter>
