@@ -1,4 +1,4 @@
-// client/src/main.jsx — Dynamic Light/Dark Theme ConfigProvider
+// client/src/main.jsx — Dynamic OriginKit Light/Dark Theme ConfigProvider
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConfigProvider, theme as antdTheme } from 'antd';
@@ -20,30 +20,70 @@ function Main() {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
     token: {
       colorPrimary:        isDark ? '#10b981' : '#059669',
-      colorBgBase:         isDark ? '#090d16' : '#f8fafc',
-      colorBgContainer:    isDark ? '#111827' : '#ffffff',
-      colorBgElevated:     isDark ? '#1f293d' : '#ffffff',
-      colorBorder:         isDark ? '#1e293b' : '#e2e8f0',
-      colorText:           isDark ? '#f1f5f9' : '#0f172a',
-      colorTextSecondary:  isDark ? '#94a3b8' : '#64748b',
-      colorSuccess:        '#10b981',
-      colorWarning:        '#f59e0b',
-      colorError:          '#ef4444',
+      colorBgBase:         isDark ? '#060913' : '#f1f5f9',
+      colorBgContainer:    isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.88)',
+      colorBgElevated:     isDark ? 'rgba(24, 33, 56, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+      colorBorder:         isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+      colorBorderSecondary:isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+      colorText:           isDark ? '#f8fafc' : '#0f172a',
+      colorTextSecondary:  isDark ? '#cbd5e1' : '#475569',
+      colorTextTertiary:   isDark ? '#94a3b8' : '#64748b',
+      colorSuccess:        isDark ? '#10b981' : '#059669',
+      colorWarning:        isDark ? '#f59e0b' : '#d97706',
+      colorError:          isDark ? '#ef4444' : '#dc2626',
       colorInfo:           isDark ? '#06b6d4' : '#0284c7',
       borderRadius:        10,
-      fontFamily:          "'Inter', -apple-system, sans-serif",
+      fontFamily:          "'Plus Jakarta Sans', -apple-system, sans-serif",
       fontSize:            14,
       controlHeight:       40,
+      boxShadow:           isDark ? '0 12px 32px rgba(0, 0, 0, 0.45)' : '0 10px 28px rgba(15, 23, 42, 0.07)',
     },
     components: {
-      Layout:  { bodyBg: 'transparent', siderBg: isDark ? '#0f172a' : '#ffffff', headerBg: isDark ? '#0f172a' : '#ffffff' },
-      Menu:    { darkItemBg: '#0f172a', darkItemSelectedBg: '#10b981', darkItemHoverBg: '#1e293b' },
-      Table:   { headerBg: isDark ? '#1e293b' : '#f1f5f9', rowHoverBg: isDark ? '#1e293b' : '#f8fafc', borderColor: isDark ? '#1e293b' : '#e2e8f0' },
-      Card:    { colorBgContainer: isDark ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.95)', colorBorderSecondary: isDark ? '#1e293b' : '#e2e8f0' },
-      Input:   { colorBgContainer: isDark ? '#1f293d' : '#ffffff', colorBorder: isDark ? '#334155' : '#cbd5e1', activeBorderColor: '#10b981' },
-      Select:  { colorBgContainer: isDark ? '#1f293d' : '#ffffff', colorBorder: isDark ? '#334155' : '#cbd5e1' },
-      Button:  { colorPrimary: isDark ? '#10b981' : '#059669' },
-      Modal:   { contentBg: isDark ? '#111827' : '#ffffff', headerBg: isDark ? '#111827' : '#ffffff', footerBg: isDark ? '#111827' : '#ffffff' },
+      Layout: {
+        bodyBg: 'transparent',
+        siderBg: isDark ? 'rgba(10, 15, 29, 0.82)' : 'rgba(255, 255, 255, 0.92)',
+        headerBg: isDark ? 'rgba(10, 15, 29, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+      },
+      Table: {
+        headerBg: isDark ? 'rgba(24, 33, 56, 0.8)' : '#f8fafc',
+        rowHoverBg: isDark ? 'rgba(30, 41, 68, 0.6)' : 'rgba(241, 245, 249, 0.8)',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+        colorText: isDark ? '#f8fafc' : '#0f172a',
+        colorTextHeading: isDark ? '#cbd5e1' : '#475569',
+      },
+      Card: {
+        colorBgContainer: isDark ? 'rgba(15, 23, 42, 0.72)' : 'rgba(255, 255, 255, 0.88)',
+        colorBorderSecondary: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+      },
+      Input: {
+        colorBgContainer: isDark ? 'rgba(20, 28, 48, 0.75)' : '#ffffff',
+        colorBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
+        activeBorderColor: isDark ? '#10b981' : '#059669',
+        colorText: isDark ? '#f8fafc' : '#0f172a',
+        colorTextPlaceholder: isDark ? '#64748b' : '#94a3b8',
+      },
+      Select: {
+        colorBgContainer: isDark ? 'rgba(20, 28, 48, 0.75)' : '#ffffff',
+        colorBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
+        colorText: isDark ? '#f8fafc' : '#0f172a',
+      },
+      Button: {
+        colorPrimary: isDark ? '#10b981' : '#059669',
+        controlHeight: 40,
+        borderRadius: 8,
+      },
+      Modal: {
+        contentBg: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+        headerBg: 'transparent',
+      },
+      Tag: {
+        borderRadiusSM: 6,
+      },
+      Segmented: {
+        trackBg: isDark ? 'rgba(20, 28, 48, 0.8)' : 'rgba(241, 245, 249, 0.9)',
+        itemSelectedBg: isDark ? '#10b981' : '#ffffff',
+        itemSelectedColor: isDark ? '#ffffff' : '#0f172a',
+      },
     },
   };
 
