@@ -1,8 +1,8 @@
-// mobile/src/screens/pos/POSScreen.jsx — Floor Mobile POS Counter & Barcode Billing
+// mobile/src/screens/pos/POSScreen.jsx — Floor Mobile POS Counter & Digital Receipt Generator
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  FlatList, Modal, Alert, ActivityIndicator, Linking
+  FlatList, Modal, Alert, ActivityIndicator, Linking, ScrollView
 } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
@@ -13,9 +13,12 @@ export default function POSScreen() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
+
   const [cartVisible, setCartVisible] = useState(false);
   const [payModalVisible, setPayModalVisible] = useState(false);
+  const [receiptVisible, setReceiptVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [completedSale, setCompletedSale] = useState(null);
   const [completing, setCompleting] = useState(false);
 
   const cart = useCartStore();
@@ -61,41 +64,54 @@ export default function POSScreen() {
     try {
       const payload = {
         paymentMethod,
-        paidAmount: cart.totalAmount(),
+        amountPaid: Number(cart.totalAmount()),
+        paidAmount: Number(cart.totalAmount()),
         items: cart.items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
-          unitPrice: i.unitPrice,
+          unitPrice: Number(i.unitPrice),
+          discountPct: 0,
         })),
       };
 
       const res = await api.post('/sales', payload);
-      const invoice = res.data?.invoiceNumber || `INV-${Date.now().toString().slice(-4)}`;
+      const saleData = res.data?.data || res.data || res;
 
-      Alert.alert(
-        'Sale Completed! 🎉',
-        `Invoice #${invoice}\nTotal: ₨ ${cart.totalAmount().toLocaleString()}`,
-        [
-          {
-            text: 'Send WhatsApp Receipt',
-            onPress: () => {
-              const text = `*Hassan Traderz — Invoice ${invoice}*\nTotal: ₨ ${cart.totalAmount().toLocaleString()}\nPaid: ${paymentMethod}\nThank you for your business!`;
-              Linking.openURL(`whatsapp://send?text=${encodeURIComponent(text)}`);
-            },
-          },
-          { text: 'Done', style: 'cancel' },
-        ]
-      );
+      // Prepare receipt data
+      const finalReceipt = {
+        invoiceNumber: saleData.invoiceNumber || `INV-${Date.now().toString().slice(-4)}`,
+        date: new Date().toLocaleString(),
+        totalAmount: cart.totalAmount(),
+        subtotal: cart.subtotal(),
+        gstAmount: cart.gstAmount(),
+        paymentMethod,
+        items: [...cart.items],
+      };
 
-      cart.clearCart();
+      setCompletedSale(finalReceipt);
       setPayModalVisible(false);
       setCartVisible(false);
+      cart.clearCart();
       fetchProducts();
+      setReceiptVisible(true);
     } catch (err) {
       Alert.alert('Checkout Failed', err.message || 'Transaction could not be saved');
     } finally {
       setCompleting(false);
     }
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!completedSale) return;
+    let text = `*Hassan Traderz — Invoice ${completedSale.invoiceNumber}*\n`;
+    text += `Date: ${completedSale.date}\n------------------\n`;
+    completedSale.items.forEach((i) => {
+      text += `• ${i.nameEn} x ${i.quantity} = ₨ ${(i.quantity * i.unitPrice).toLocaleString()}\n`;
+    });
+    text += `------------------\n*Total Amount: ₨ ${completedSale.totalAmount.toLocaleString()}*\n`;
+    text += `Payment: ${completedSale.paymentMethod}\n\nThank you for shopping at Hassan Traderz!`;
+
+    Linking.openURL(`whatsapp://send?text=${encodeURIComponent(text)}`);
   };
 
   const formatPKR = (v) => `₨ ${(Number(v) || 0).toLocaleString()}`;
@@ -269,12 +285,81 @@ export default function POSScreen() {
               onPress={handleCheckout}
               disabled={completing}
             >
-              {completing ? <ActivityIndicator color="#fff" /> : <Text style={styles.paySubmitText}>Complete & Generate Invoice</Text>}
+              {completing ? <ActivityIndicator color="#fff" /> : <Text style={styles.paySubmitText}>Generate Sale & Receipt</Text>}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.cancelBtn} onPress={() => setPayModalVisible(false)}>
               <Text style={{ color: colors.textMuted, fontWeight: '700' }}>Cancel</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* FULL-SCREEN DIGITAL RECEIPT MODAL */}
+      <Modal visible={receiptVisible} animationType="slide" transparent>
+        <View style={styles.receiptOverlay}>
+          <View style={styles.receiptCard}>
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+              <View style={styles.receiptHeader}>
+                <Text style={styles.receiptShopName}>HASSAN TRADERZ</Text>
+                <Text style={styles.receiptShopSub}>Mobile Phones & Accessories House</Text>
+                <Text style={styles.receiptShopContact}>Main Bazaar, Lahore | Ph: 0300-0000000</Text>
+              </View>
+
+              <View style={styles.receiptDivider} />
+
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptMetaBold}>Invoice #:</Text>
+                <Text style={styles.receiptMetaVal}>{completedSale?.invoiceNumber}</Text>
+              </View>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptMeta}>Date:</Text>
+                <Text style={styles.receiptMetaVal}>{completedSale?.date}</Text>
+              </View>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptMeta}>Payment:</Text>
+                <Text style={styles.receiptMetaVal}>{completedSale?.paymentMethod}</Text>
+              </View>
+
+              <View style={styles.receiptDivider} />
+
+              <Text style={[styles.receiptMetaBold, { marginBottom: 6 }]}>ITEMS PURCHASED:</Text>
+              {completedSale?.items?.map((item, idx) => (
+                <View key={idx} style={styles.receiptItemRow}>
+                  <Text style={styles.receiptItemName}>{item.nameEn} x{item.quantity}</Text>
+                  <Text style={styles.receiptItemPrice}>₨ {(item.quantity * item.unitPrice).toLocaleString()}</Text>
+                </View>
+              ))}
+
+              <View style={styles.receiptDivider} />
+
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptMeta}>Subtotal:</Text>
+                <Text style={styles.receiptMetaVal}>₨ {completedSale?.subtotal?.toLocaleString()}</Text>
+              </View>
+              <View style={styles.receiptRow}>
+                <Text style={styles.receiptMeta}>GST (17%):</Text>
+                <Text style={styles.receiptMetaVal}>₨ {completedSale?.gstAmount?.toLocaleString()}</Text>
+              </View>
+
+              <View style={[styles.receiptRow, { marginTop: 8, borderTopWidth: 1, borderTopColor: '#e2e8f0', paddingTop: 8 }]}>
+                <Text style={styles.receiptTotalLabel}>TOTAL PAID:</Text>
+                <Text style={styles.receiptTotalVal}>₨ {completedSale?.totalAmount?.toLocaleString()}</Text>
+              </View>
+
+              <Text style={styles.receiptThankYou}>Thank you for shopping at Hassan Traderz!</Text>
+            </ScrollView>
+
+            <View style={styles.receiptActionFooter}>
+              <TouchableOpacity style={styles.receiptWaBtn} onPress={handleShareWhatsApp}>
+                <MaterialCommunityIcons name="whatsapp" size={20} color="#fff" />
+                <Text style={styles.receiptWaBtnText}>Share on WhatsApp</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.receiptDoneBtn} onPress={() => setReceiptVisible(false)}>
+                <Text style={styles.receiptDoneBtnText}>Done (New Sale)</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -386,4 +471,26 @@ const styles = StyleSheet.create({
   paySubmitBtn: { backgroundColor: colors.primary, borderRadius: 12, height: 48, alignItems: 'center', justifyContent: 'center', marginTop: 14 },
   paySubmitText: { color: '#fff', fontSize: 15, fontWeight: '800' },
   cancelBtn: { alignItems: 'center', paddingVertical: 12 },
+  receiptOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', padding: 20 },
+  receiptCard: { backgroundColor: '#fff', borderRadius: 20, maxHeight: '85%', overflow: 'hidden' },
+  receiptHeader: { alignItems: 'center', marginBottom: 10 },
+  receiptShopName: { fontSize: 20, fontWeight: '900', color: '#0f172a', letterSpacing: 0.5 },
+  receiptShopSub: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  receiptShopContact: { fontSize: 11, color: '#94a3b8', marginTop: 2 },
+  receiptDivider: { height: 1, backgroundColor: '#e2e8f0', marginVertical: 10 },
+  receiptRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  receiptMeta: { fontSize: 12.5, color: '#64748b' },
+  receiptMetaBold: { fontSize: 12.5, fontWeight: '700', color: '#0f172a' },
+  receiptMetaVal: { fontSize: 12.5, fontWeight: '600', color: '#0f172a' },
+  receiptItemRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 3 },
+  receiptItemName: { fontSize: 13, fontWeight: '600', color: '#0f172a' },
+  receiptItemPrice: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
+  receiptTotalLabel: { fontSize: 16, fontWeight: '900', color: '#059669' },
+  receiptTotalVal: { fontSize: 18, fontWeight: '900', color: '#059669' },
+  receiptThankYou: { textAlign: 'center', fontSize: 12, color: '#64748b', marginTop: 16 },
+  receiptActionFooter: { padding: 16, backgroundColor: '#f8fafc', borderTopWidth: 1, borderTopColor: '#e2e8f0', gap: 10 },
+  receiptWaBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#25D366', height: 46, borderRadius: 12 },
+  receiptWaBtnText: { color: '#fff', fontSize: 14, fontWeight: '800' },
+  receiptDoneBtn: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', height: 46, borderRadius: 12 },
+  receiptDoneBtnText: { color: '#fff', fontSize: 14, fontWeight: '800' },
 });

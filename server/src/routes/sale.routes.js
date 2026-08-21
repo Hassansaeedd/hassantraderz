@@ -45,7 +45,8 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 // POST /sales — Create a new sale (atomic with stock decrement)
 router.post('/', validate(createSaleSchema), asyncHandler(async (req, res) => {
-  const { items, customerId, paymentMethod, amountPaid, discountAmount = 0, paymentRef, notes, offlineId } = req.validatedBody;
+  const { items, customerId, paymentMethod = 'CASH', amountPaid, paidAmount, discountAmount = 0, paymentRef, notes, offlineId } = req.validatedBody;
+  const actualPaid = Number(amountPaid !== undefined ? amountPaid : (paidAmount !== undefined ? paidAmount : 0));
   const userId = req.user.userId;
 
   // Check offline dedup
@@ -83,18 +84,18 @@ router.post('/', validate(createSaleSchema), asyncHandler(async (req, res) => {
     }
 
     const totalAmount  = subtotal + gstAmount - discountAmount;
-    const changeAmount = Math.max(0, amountPaid - totalAmount);
-    const dueAmount    = Math.max(0, totalAmount - amountPaid);
+    const changeAmount = Math.max(0, actualPaid - totalAmount);
+    const dueAmount    = Math.max(0, totalAmount - actualPaid);
     const invoiceNumber = await generateInvoiceNumber();
 
     return tx.sale.create({
       data: {
         invoiceNumber, userId, customerId: customerId || null, offlineId: offlineId || null,
-        subtotal, gstAmount, discountAmount, totalAmount, paidAmount: amountPaid, changeAmount, dueAmount,
+        subtotal, gstAmount, discountAmount, totalAmount, paidAmount: actualPaid, changeAmount, dueAmount,
         paymentMethod, paymentRef: paymentRef || null, notes: notes || null,
         syncedAt: offlineId ? new Date() : null,
         items: { create: enrichedItems },
-        payments: { create: [{ amount: amountPaid, method: paymentMethod, reference: paymentRef }] },
+        payments: { create: [{ amount: actualPaid, method: paymentMethod, reference: paymentRef }] },
       },
       include: { items: { include: { product: { select: { nameEn: true, nameUr: true } } } }, customer: true, user: { select: { fullName: true } } },
     });

@@ -1,43 +1,45 @@
-// client/src/pages/pos/POSPage.jsx — POS Sales Counter with Professional Product Thumbnails & Logo
-import { useState, useEffect } from 'react';
+// client/src/pages/pos/POSPage.jsx — Modern POS Counter with Direct PDF & Thermal Receipt
+import { useState, useEffect, useRef } from 'react';
 import {
-  Row, Col, Card, Input, Button, Tag, Badge, Select, Space,
-  Modal, Form, InputNumber, Divider, Drawer, message
+  Row, Col, Card, Input, Button, Table, Space, Tag, Modal,
+  Form, Select, InputNumber, Divider, message, Badge, Drawer, Alert
 } from 'antd';
 import {
-  SearchOutlined, ShoppingCartOutlined, DeleteOutlined,
-  PlusOutlined, MinusOutlined, CheckCircleOutlined,
-  PrinterOutlined, PauseCircleOutlined, PlayCircleOutlined,
-  BarcodeOutlined, WhatsAppOutlined
+  ShoppingCartOutlined, DeleteOutlined, PlusOutlined,
+  MinusOutlined, PrinterOutlined, PauseCircleOutlined,
+  PlayCircleOutlined, WhatsAppOutlined, SearchOutlined,
+  BarcodeOutlined, DownloadOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import api from '../../api/axiosInstance';
 import { useCartStore } from '../../store/cartStore';
 import { formatCurrency } from '../../utils/formatters';
 import { printReceiptHTML } from '../../utils/thermalPrint';
 import ProductThumbnail from '../../components/common/ProductThumbnail';
+import api from '../../api/axiosInstance';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const { Option } = Select;
 
 export default function POSPage() {
   const { t, i18n } = useTranslation();
-  const cart        = useCartStore();
+  const cart = useCartStore();
+  const [form] = Form.useForm();
 
-  const [products, setProducts]       = useState([]);
-  const [categories, setCategories]   = useState([]);
-  const [customers, setCustomers]     = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Checkout Modal State
-  const [payModalVisible, setPayModalVisible]       = useState(false);
+  const [payModalVisible, setPayModalVisible] = useState(false);
   const [receiptModalVisible, setReceiptModalVisible] = useState(false);
-  const [receiptSale, setReceiptSale]               = useState(null);
-  const [heldDrawerVisible, setHeldDrawerVisible]   = useState(false);
-  const [amountTendered, setAmountTendered]         = useState(0);
-  const [submitting, setSubmitting]                 = useState(false);
-  const [form]                                      = Form.useForm();
+  const [heldDrawerVisible, setHeldDrawerVisible] = useState(false);
+  const [receiptSale, setReceiptSale] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [amountTendered, setAmountTendered] = useState(0);
 
   useEffect(() => {
     fetchProducts();
@@ -45,15 +47,19 @@ export default function POSPage() {
     fetchCustomers();
   }, []);
 
-  const fetchProducts = async (q = searchQuery, catId = selectedCategory) => {
+  const fetchProducts = async (query = '', catId = null) => {
+    setLoading(true);
     try {
       let url = '/products?limit=100';
-      if (q) url += `&search=${encodeURIComponent(q)}`;
+      if (query) url += `&search=${encodeURIComponent(query)}`;
       if (catId) url += `&categoryId=${catId}`;
       const res = await api.get(url);
-      setProducts(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+      const data = Array.isArray(res.data) ? res.data : (res.data?.data || res || []);
+      setProducts(data);
     } catch {
       message.error('Failed to load products');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,21 +112,23 @@ export default function POSPage() {
     try {
       const payload = {
         customerId: values.customerId || null,
-        paymentMethod: values.paymentMethod,
-        paidAmount: Number(values.amountPaid),
+        paymentMethod: values.paymentMethod || 'CASH',
+        amountPaid: Number(values.amountPaid !== undefined ? values.amountPaid : cart.totalAmount()),
+        discountAmount: 0,
         paymentRef: values.paymentRef || null,
         notes: values.notes || null,
         items: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
+          unitPrice: Number(item.unitPrice),
+          discountPct: 0,
         })),
       };
 
       const res = await api.post('/sales', payload);
-      const completedSale = res.data || res;
+      const completedSale = res.data?.data || res.data || res;
 
-      message.success(`Sale completed! Invoice ${completedSale.invoiceNumber}`);
+      message.success(`Sale completed! Invoice ${completedSale.invoiceNumber || 'Created'}`);
       setPayModalVisible(false);
       setReceiptSale(completedSale);
       setReceiptModalVisible(true);
@@ -133,15 +141,67 @@ export default function POSPage() {
     }
   };
 
+  const handleDownloadPDFReceipt = () => {
+    if (!receiptSale) return;
+    try {
+      const doc = new jsPDF({
+        unit: 'mm',
+        format: [80, 160],
+      });
+
+      doc.setFontSize(14);
+      doc.text('Hassan Traderz', 40, 10, { align: 'center' });
+      doc.setFontSize(8);
+      doc.text('Mobile House & Accessories', 40, 15, { align: 'center' });
+      doc.text('Main Bazaar, Lahore | Ph: 0300-0000000', 40, 19, { align: 'center' });
+      doc.line(5, 22, 75, 22);
+
+      doc.setFontSize(8);
+      doc.text(`Invoice: ${receiptSale.invoiceNumber}`, 5, 27);
+      doc.text(`Date: ${new Date(receiptSale.saleDate || Date.now()).toLocaleDateString()}`, 5, 31);
+      doc.text(`Customer: ${receiptSale.customer?.name || 'Walk-in Customer'}`, 5, 35);
+      doc.line(5, 38, 75, 38);
+
+      let y = 43;
+      receiptSale.items?.forEach((i) => {
+        const name = (i.product?.nameEn || i.nameEn || 'Item').slice(0, 18);
+        doc.text(`${name} x${i.quantity}`, 5, y);
+        doc.text(`₨ ${i.totalAmount || (i.quantity * i.unitPrice)}`, 75, y, { align: 'right' });
+        y += 5;
+      });
+
+      doc.line(5, y, 75, y);
+      y += 5;
+      doc.text(`Subtotal: ₨ ${receiptSale.subtotal}`, 5, y);
+      y += 4;
+      doc.text(`GST (17%): ₨ ${receiptSale.gstAmount}`, 5, y);
+      y += 5;
+      doc.setFontSize(10);
+      doc.text(`TOTAL: ₨ ${receiptSale.totalAmount}`, 5, y);
+      y += 5;
+      doc.setFontSize(8);
+      doc.text(`Paid (${receiptSale.paymentMethod}): ₨ ${receiptSale.paidAmount}`, 5, y);
+      y += 4;
+      doc.text(`Change: ₨ ${receiptSale.changeAmount || 0}`, 5, y);
+      y += 7;
+      doc.text('Thank you for your business!', 40, y, { align: 'center' });
+
+      doc.save(`Invoice_${receiptSale.invoiceNumber}.pdf`);
+      message.success('Receipt PDF saved successfully to Downloads!');
+    } catch {
+      message.error('Failed to generate PDF receipt');
+    }
+  };
+
   const handleSendWhatsAppReceipt = () => {
     if (!receiptSale) return;
     const phone = receiptSale.customer?.phone?.replace(/[^0-9]/g, '') || '';
     const shopName = 'Hassan Traderz';
     let text = `*${shopName} — Invoice ${receiptSale.invoiceNumber}*\n`;
-    text += `Date: ${new Date(receiptSale.saleDate).toLocaleString()}\n`;
+    text += `Date: ${new Date(receiptSale.saleDate || Date.now()).toLocaleString()}\n`;
     text += `Customer: ${receiptSale.customer?.name || 'Valued Customer'}\n------------------\n`;
     receiptSale.items?.forEach(i => {
-      text += `• ${i.product?.nameEn || i.nameEn} x ${i.quantity} = ₨ ${i.totalAmount}\n`;
+      text += `• ${i.product?.nameEn || i.nameEn} x ${i.quantity} = ₨ ${i.totalAmount || (i.quantity * i.unitPrice)}\n`;
     });
     text += `------------------\n*Total Amount: ₨ ${receiptSale.totalAmount}*\nPaid: ₨ ${receiptSale.paidAmount}\nThank you for shopping at Hassan Traderz!`;
 
@@ -253,102 +313,140 @@ export default function POSPage() {
           </Card>
         </Col>
 
-        {/* RIGHT PANEL: POS Cart & Checkout */}
+        {/* RIGHT PANEL: Shopping Cart & Checkout Summary */}
         <Col xs={24} lg={10} xl={9} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Card
-            bodyStyle={{ padding: 16, display: 'flex', flexDirection: 'column', height: '100%' }}
+            title={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Space>
+                  <ShoppingCartOutlined style={{ color: 'var(--primary)' }} />
+                  <span>{t('pos.cart')} ({cart.itemCount()})</span>
+                </Space>
+                <Button danger size="small" type="text" onClick={cart.clearCart} disabled={cart.items.length === 0}>
+                  {t('pos.clearCart')}
+                </Button>
+              </div>
+            }
+            bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
             style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', height: '100%' }}
           >
-            {/* Cart Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 12, marginBottom: 12 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ShoppingCartOutlined style={{ color: 'var(--primary)' }} /> {t('pos.cart')} ({cart.itemCount()})
-              </div>
-              <Button type="text" danger icon={<DeleteOutlined />} onClick={cart.clearCart} disabled={cart.items.length === 0}>
-                Clear
-              </Button>
-            </div>
-
-            {/* Customer Select */}
+            {/* Customer Selector */}
             <Select
               showSearch
-              placeholder={t('pos.selectCustomer')}
+              placeholder="Walk-in Customer (Optional)"
               optionFilterProp="children"
               value={cart.customer?.id || null}
-              onChange={(val) => cart.setCustomer(customers.find(c => c.id === val) || null)}
+              onChange={(val) => {
+                const c = customers.find(x => x.id === val);
+                cart.setCustomer(c || null);
+              }}
               allowClear
-              style={{ width: '100%', marginBottom: 12 }}
+              style={{ width: '100%', marginBottom: 10 }}
             >
               {customers.map(c => (
-                <Option key={c.id} value={c.id}>{c.name} ({c.phone || 'No phone'})</Option>
+                <Option key={c.id} value={c.id}>
+                  {c.name} ({c.phone})
+                </Option>
               ))}
             </Select>
 
             {/* Cart Items List */}
-            <div style={{ flex: 1, overflowY: 'auto', borderBottom: '1px solid var(--border)', paddingBottom: 12, marginBottom: 12 }}>
+            <div style={{ flex: 1, overflowY: 'auto', marginBottom: 10 }}>
               {cart.items.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                  <ShoppingCartOutlined style={{ fontSize: 48, marginBottom: 12, opacity: 0.3 }} />
-                  <div>{t('pos.emptyCart')}</div>
+                  <ShoppingCartOutlined style={{ fontSize: 40, marginBottom: 10, opacity: 0.4 }} />
+                  <div>{t('pos.cartEmpty')}</div>
                 </div>
               ) : (
                 cart.items.map(item => (
-                  <div key={item.productId} className="cart-item" style={{ background: 'var(--bg-elevated)', padding: 10, borderRadius: 8, marginBottom: 8, border: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-                      <span>{isUrdu ? item.nameUr : item.nameEn}</span>
-                      <span>{formatCurrency(item.lineTotal)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        {formatCurrency(item.unitPrice)} x {item.quantity}
-                      </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Button size="small" icon={<MinusOutlined />} onClick={() => cart.updateQuantity(item.productId, item.quantity - 1)} />
-                        <span style={{ fontWeight: 600, width: 24, textAlign: 'center' }}>{item.quantity}</span>
-                        <Button size="small" icon={<PlusOutlined />} onClick={() => cart.updateQuantity(item.productId, item.quantity + 1)} />
-                        <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={() => cart.removeItem(item.productId)} />
+                  <div
+                    key={item.productId}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '8px 10px', marginBottom: 6,
+                      background: 'var(--bg-elevated)', borderRadius: 8,
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {isUrdu && item.nameUr ? item.nameUr : item.nameEn}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                        {formatCurrency(item.unitPrice)} × {item.quantity}
                       </div>
                     </div>
+
+                    <Space size={4}>
+                      <Button
+                        size="small"
+                        icon={<MinusOutlined />}
+                        onClick={() => cart.updateQuantity(item.productId, item.quantity - 1)}
+                      />
+                      <span style={{ fontWeight: 700, padding: '0 6px', minWidth: 24, textAlign: 'center' }}>
+                        {item.quantity}
+                      </span>
+                      <Button
+                        size="small"
+                        icon={<PlusOutlined />}
+                        onClick={() => cart.updateQuantity(item.productId, item.quantity + 1)}
+                      />
+                      <Button
+                        size="small"
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => cart.removeItem(item.productId)}
+                      />
+                    </Space>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Order Totals Summary */}
-            <div style={{ background: 'var(--bg-elevated)', padding: 12, borderRadius: 8, marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: 4 }}>
-                <span>{t('pos.subtotal')}:</span>
-                <span>{formatCurrency(cart.subtotal())}</span>
+            {/* Billing Summary Box */}
+            <div style={{ background: 'var(--bg-elevated)', padding: 12, borderRadius: 8, border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-muted)' }}>{t('pos.subtotal')}:</span>
+                <span style={{ fontWeight: 600 }}>{formatCurrency(cart.subtotal())}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: 4 }}>
-                <span>GST (17%):</span>
-                <span>{formatCurrency(cart.gstAmount())}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-muted)' }}>GST (17%):</span>
+                <span style={{ fontWeight: 600 }}>{formatCurrency(cart.gstAmount())}</span>
               </div>
-              <Divider style={{ margin: '8px 0', borderColor: 'var(--border)' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 20, fontWeight: 800, color: 'var(--success)' }}>
+              <Divider style={{ margin: '6px 0' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 800 }}>
                 <span>{t('pos.total')}:</span>
-                <span>{formatCurrency(cart.totalAmount())}</span>
+                <span style={{ color: 'var(--primary)' }}>{formatCurrency(cart.totalAmount())}</span>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <Row gutter={8}>
-              <Col span={8}>
-                <Button block size="large" onClick={cart.holdSale} disabled={cart.items.length === 0}>
-                  {t('pos.holdSale')}
+            <Row gutter={[8, 8]} style={{ marginTop: 10 }}>
+              <Col span={10}>
+                <Button
+                  block
+                  size="large"
+                  icon={<PauseCircleOutlined />}
+                  onClick={() => {
+                    cart.holdSale();
+                    message.info('Sale held in memory');
+                  }}
+                  disabled={cart.items.length === 0}
+                >
+                  Hold Sale
                 </Button>
               </Col>
-              <Col span={16}>
+              <Col span={14}>
                 <Button
                   type="primary"
                   block
                   size="large"
-                  icon={<CheckCircleOutlined />}
                   onClick={handleOpenPayment}
                   disabled={cart.items.length === 0}
-                  style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', height: 44, fontWeight: 700, fontSize: 16 }}
+                  style={{ fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none' }}
                 >
-                  {t('pos.pay')}
+                  Checkout ({formatCurrency(cart.totalAmount())})
                 </Button>
               </Col>
             </Row>
@@ -358,57 +456,63 @@ export default function POSPage() {
 
       {/* PAYMENT MODAL */}
       <Modal
-        title={<span style={{ fontSize: 18, fontWeight: 700 }}>{t('pos.payment')} — Total: {formatCurrency(cart.totalAmount())}</span>}
+        title={<span style={{ fontWeight: 800, fontSize: 17 }}>Complete Payment (ادائیگی کاؤنٹر)</span>}
         open={payModalVisible}
         onCancel={() => setPayModalVisible(false)}
         footer={null}
-        destroyOnClose
+        width={500}
       >
         <Form form={form} layout="vertical" onFinish={handleCompleteSale}>
-          <Form.Item name="paymentMethod" label="Payment Method" rules={[{ required: true }]}>
-            <Select size="large">
-              <Option value="CASH">💵 Cash (نقد)</Option>
-              <Option value="CARD">💳 Card</Option>
-              <Option value="EASYPAISA">📱 EasyPaisa (ایزی پیسہ)</Option>
-              <Option value="JAZZCASH">📱 JazzCash (جاز کیش)</Option>
-              <Option value="BANK_TRANSFER">🏦 Bank Transfer</Option>
+          <div style={{ textAlign: 'center', padding: '12px 0', background: 'var(--bg-elevated)', borderRadius: 10, marginBottom: 16, border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Amount Payable:</div>
+            <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--primary)' }}>
+              {formatCurrency(cart.totalAmount())}
+            </div>
+          </div>
+
+          <Form.Item name="customerId" label="Customer (گاہک)">
+            <Select placeholder="Walk-in Customer" allowClear size="large">
+              {customers.map(c => (
+                <Option key={c.id} value={c.id}>{c.name} ({c.phone})</Option>
+              ))}
             </Select>
           </Form.Item>
 
-          <Form.Item name="customerId" label="Customer">
-            <Select placeholder="Select Customer" allowClear size="large">
-              {customers.map(c => (
-                <Option key={c.id} value={c.id}>{c.name} ({c.phone || 'No phone'})</Option>
-              ))}
+          <Form.Item name="paymentMethod" label="Payment Method (ادائیگی کا طریقہ)" rules={[{ required: true }]}>
+            <Select size="large">
+              <Option value="CASH">💵 Cash (نقد)</Option>
+              <Option value="EASYPAISA">📱 EasyPaisa (ایزی پیسہ)</Option>
+              <Option value="JAZZCASH">📱 JazzCash (جاز کیش)</Option>
+              <Option value="CARD">💳 Debit / Credit Card (بینک کارڈ)</Option>
+              <Option value="CREDIT">📖 Customer Khata (ادھار کھاتہ)</Option>
             </Select>
           </Form.Item>
 
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="amountPaid" label={t('pos.amountPaid')} rules={[{ required: true }]}>
+              <Form.Item name="amountPaid" label="Amount Tendered / Paid" rules={[{ required: true }]}>
                 <InputNumber
                   size="large"
                   style={{ width: '100%' }}
-                  prefix="₨"
                   onChange={(val) => setAmountTendered(val || 0)}
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label={t('pos.changeDue')}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--success)', paddingTop: 4 }}>
+              <Form.Item label="Change Return (بقایا رقم)">
+                <div style={{
+                  height: 40, lineHeight: '40px', padding: '0 12px',
+                  background: 'var(--bg-elevated)', borderRadius: 8,
+                  fontWeight: 800, color: 'var(--primary)', border: '1px solid var(--border)',
+                }}>
                   {formatCurrency(Math.max(0, amountTendered - cart.totalAmount()))}
                 </div>
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="paymentRef" label="Payment Reference / Txn ID (Optional)">
-            <Input placeholder="Enter Transaction Ref / Card Last 4 Digits" size="large" />
-          </Form.Item>
-
-          <Form.Item name="notes" label="Sale Notes (Optional)">
-            <Input.TextArea rows={2} placeholder="Internal notes" />
+          <Form.Item name="paymentRef" label="Payment Ref / Txn ID (Optional)">
+            <Input placeholder="e.g. JazzCash Txn ID / Card Last 4" size="large" />
           </Form.Item>
 
           <Button
@@ -417,27 +521,43 @@ export default function POSPage() {
             block
             size="large"
             loading={submitting}
-            style={{ height: 48, background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 700, fontSize: 16 }}
+            style={{ height: 48, background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 800, fontSize: 16 }}
           >
-            Complete Sale & Print Receipt
+            Complete Sale & Generate Receipt
           </Button>
         </Form>
       </Modal>
 
-      {/* RECEIPT MODAL WITH WHATSAPP RECEIPT */}
+      {/* RECEIPT MODAL WITH PDF DOWNLOAD & THERMAL PRINT */}
       <Modal
-        title="Sale Receipt"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CheckCircleOutlined style={{ color: '#10b981', fontSize: 20 }} />
+            <span style={{ fontWeight: 800 }}>Sale Receipt & Invoice</span>
+          </div>
+        }
         open={receiptModalVisible}
         onCancel={() => setReceiptModalVisible(false)}
+        width={520}
         footer={[
-          <Button key="close" onClick={() => setReceiptModalVisible(false)}>Close</Button>,
+          <Button key="close" onClick={() => setReceiptModalVisible(false)}>
+            Close (Done)
+          </Button>,
+          <Button
+            key="pdf"
+            icon={<DownloadOutlined />}
+            onClick={handleDownloadPDFReceipt}
+            style={{ fontWeight: 700, borderColor: '#0284c7', color: '#0284c7' }}
+          >
+            Save as PDF
+          </Button>,
           <Button
             key="whatsapp"
             icon={<WhatsAppOutlined style={{ color: '#25D366' }} />}
             onClick={handleSendWhatsAppReceipt}
             style={{ fontWeight: 700, borderColor: '#25D366', color: '#25D366' }}
           >
-            Send WhatsApp Receipt
+            WhatsApp
           </Button>,
           <Button
             key="print"
@@ -449,32 +569,60 @@ export default function POSPage() {
             }}
             style={{ fontWeight: 700 }}
           >
-            Print Thermal Receipt (80mm)
+            Print
           </Button>
         ]}
       >
         {receiptSale && (
-          <div style={{ background: '#fff', color: '#000', padding: 16, fontFamily: 'monospace', borderRadius: 6 }}>
-            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Hassan Traderz</div>
-            <div style={{ textAlign: 'center', fontSize: 12 }}>Main Bazaar, Lahore</div>
-            <Divider style={{ margin: '8px 0' }} />
-            <div><b>Invoice #:</b> {receiptSale.invoiceNumber}</div>
-            <div><b>Date:</b> {new Date(receiptSale.saleDate).toLocaleString()}</div>
-            <div><b>Customer:</b> {receiptSale.customer?.name || 'Walk-in Customer'}</div>
-            <Divider style={{ margin: '8px 0' }} />
+          <div style={{ background: '#fff', color: '#000', padding: 20, fontFamily: 'monospace', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18, color: '#0f172a' }}>HASSAN TRADERZ</div>
+            <div style={{ textAlign: 'center', fontSize: 12, color: '#475569' }}>Mobile Phones & Accessories House</div>
+            <div style={{ textAlign: 'center', fontSize: 11, color: '#64748b' }}>Main Bazaar, Lahore | Ph: 0300-0000000</div>
+            <Divider style={{ margin: '10px 0', borderColor: '#cbd5e1' }} />
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+              <span><b>Invoice #:</b> {receiptSale.invoiceNumber}</span>
+              <span><b>Date:</b> {new Date(receiptSale.saleDate || Date.now()).toLocaleDateString()}</span>
+            </div>
+            <div style={{ fontSize: 12, marginBottom: 6 }}>
+              <b>Customer:</b> {receiptSale.customer?.name || 'Walk-in Customer'}
+            </div>
+            
+            <Divider style={{ margin: '8px 0', borderColor: '#cbd5e1' }} />
+            
+            <div style={{ fontWeight: 'bold', fontSize: 12, display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span>ITEM</span>
+              <span>TOTAL</span>
+            </div>
+
             {receiptSale.items?.map((item, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 2 }}>
                 <span>{item.product?.nameEn || item.nameEn} x {item.quantity}</span>
-                <span>{formatCurrency(item.totalAmount)}</span>
+                <span>₨ {(item.totalAmount || (item.quantity * item.unitPrice)).toLocaleString()}</span>
               </div>
             ))}
-            <Divider style={{ margin: '8px 0' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Subtotal:</span><span>{formatCurrency(receiptSale.subtotal)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>GST (17%):</span><span>{formatCurrency(receiptSale.gstAmount)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: 14 }}><span>TOTAL:</span><span>{formatCurrency(receiptSale.totalAmount)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Paid:</span><span>{formatCurrency(receiptSale.paidAmount)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Change:</span><span>{formatCurrency(receiptSale.changeAmount)}</span></div>
-            <div style={{ textAlign: 'center', marginTop: 12, fontSize: 11 }}>Thank you for shopping at Hassan Traderz!</div>
+
+            <Divider style={{ margin: '8px 0', borderColor: '#cbd5e1' }} />
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+              <span>Subtotal:</span><span>₨ {Number(receiptSale.subtotal).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+              <span>GST (17%):</span><span>₨ {Number(receiptSale.gstAmount).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: 15, margin: '4px 0', color: '#059669' }}>
+              <span>TOTAL AMOUNT:</span><span>₨ {Number(receiptSale.totalAmount).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+              <span>Paid ({receiptSale.paymentMethod}):</span><span>₨ {Number(receiptSale.paidAmount).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+              <span>Change Return:</span><span>₨ {Number(receiptSale.changeAmount || 0).toLocaleString()}</span>
+            </div>
+
+            <Divider style={{ margin: '10px 0', borderColor: '#cbd5e1' }} />
+            <div style={{ textAlign: 'center', fontSize: 11, color: '#475569' }}>Thank you for shopping at Hassan Traderz!</div>
+            <div style={{ textAlign: 'center', fontSize: 10, color: '#94a3b8' }}>Goods once sold will not be returned without invoice</div>
           </div>
         )}
       </Modal>
