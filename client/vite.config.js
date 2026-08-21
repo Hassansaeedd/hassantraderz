@@ -9,24 +9,24 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.png'],
       manifest: {
-        name: 'Mobile Shop POS',
-        short_name: 'MobilePOS',
-        description: 'Mobile Shop Point of Sale & Inventory Management System',
-        theme_color: '#1a1a2e',
-        background_color: '#1a1a2e',
+        name: 'Hassan Traderz POS',
+        short_name: 'HassanPOS',
+        description: 'Hassan Traderz Point of Sale & Inventory Management System',
+        theme_color: '#060913',
+        background_color: '#060913',
         display: 'standalone',
         orientation: 'landscape',
         start_url: '/',
         icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/logo.png', sizes: '192x192', type: 'image/png' },
+          { src: '/logo.png', sizes: '512x512', type: 'image/png' },
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 8000000, // 8 MB cache limit for Workbox
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            // Cache API GET requests for offline
             urlPattern: /^https?:\/\/.*\/api\/v1\/(products|categories|brands|customers|settings)/,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'api-cache', expiration: { maxAgeSeconds: 60 * 60 * 24 } },
@@ -35,6 +35,19 @@ export default defineConfig({
       },
     }),
   ],
+
+  build: {
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          antd: ['antd', '@ant-design/icons'],
+          pdf: ['jspdf', 'jspdf-autotable'],
+          charts: ['recharts'],
+        },
+      },
+    },
+  },
 
   server: {
     port: 5173,
