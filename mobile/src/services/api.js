@@ -1,13 +1,26 @@
-// mobile/src/services/api.js — Mobile Axios API Client
+// mobile/src/services/api.js — Dynamic Mobile Axios API Client with Auto-IP Resolution
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-// In development, replace with your local Wi-Fi IP or ngrok tunnel (e.g. http://192.168.1.100:3001/api/v1)
-export const BASE_URL = 'http://10.0.2.2:3001/api/v1'; // 10.0.2.2 for Android Emulator, use machine IP for real phone
+// Dynamically resolve your computer's local Wi-Fi IP address from Expo Metro
+const getBaseUrl = () => {
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    return `http://${ip}:3001/api/v1`;
+  }
+  // Fallback to explicit LAN IP
+  return 'http://192.168.100.49:3001/api/v1';
+};
+
+export const BASE_URL = getBaseUrl();
+
+console.log('[Mobile API] Connecting to backend at:', BASE_URL);
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 12000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -30,7 +43,7 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'Network request failed';
+    const message = error.response?.data?.message || error.message || 'Network connection failed. Make sure your server is running on http://192.168.100.49:3001';
     return Promise.reject(new Error(message));
   }
 );

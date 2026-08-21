@@ -1,4 +1,4 @@
-// server/src/index.js — Express App Entry Point
+// server/src/index.js — Express App Entry Point with Mobile CORS
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -26,17 +26,17 @@ const PORT = process.env.PORT || 3001;
 
 // ─── Security Middleware ───────────────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false, // Handled by Nginx
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
 }));
 
+// CORS Configuration (Supports Web + Mobile Native Expo Apps)
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:3000',
-    /^http:\/\/192\.168\.\d+\.\d+$/,    // Allow local network IPs
-    /^http:\/\/10\.\d+\.\d+\.\d+$/,     // Allow 10.x.x.x LAN IPs
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -45,14 +45,14 @@ app.use(cors({
 // ─── Rate Limiting ─────────────────────────────────────────────────────────
 app.use('/api/v1/auth/login', rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 100, // Relaxed for local dev & testing
   message: { success: false, message: 'Too many login attempts. Try after 15 minutes.' },
   skipSuccessfulRequests: true,
 }));
 
 app.use('/api/v1/', rateLimit({
   windowMs: 60 * 1000,
-  max: 500,
+  max: 1000,
 }));
 
 // ─── General Middleware ────────────────────────────────────────────────────
@@ -99,12 +99,13 @@ app.use('*', (req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────
 app.use(globalErrorHandler);
 
-// ─── Start Server ─────────────────────────────────────────────────────────
+// ─── Start Server on 0.0.0.0 (Accessible across Local Wi-Fi Network) ────────
 app.listen(PORT, '0.0.0.0', () => {
   logger.info(`
   ╔══════════════════════════════════════════╗
   ║   Mobile Shop POS — API Server           ║
   ║   Running on: http://0.0.0.0:${PORT}        ║
+  ║   Local Wi-Fi: http://192.168.100.49:${PORT}║
   ║   Environment: ${(process.env.NODE_ENV || 'development').padEnd(26)}║
   ╚══════════════════════════════════════════╝
   `);
