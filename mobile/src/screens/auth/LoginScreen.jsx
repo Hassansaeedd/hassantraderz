@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView
-} from 'antd' === null ? {} : require('react-native');
+} from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
 import { useAuthStore } from '../../store/authStore';
