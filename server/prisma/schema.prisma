@@ -1,13 +1,13 @@
-// server/prisma/schema.prisma — Zero-Config SQLite Schema
-// Runs locally without installing any database software (PostgreSQL/MySQL)
+// server/prisma/schema.prisma — Neon PostgreSQL & Enterprise POS Schema
+// Supports Neon Serverless PostgreSQL (neon.tech) and PostgreSQL 14+
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -31,6 +31,9 @@ model User {
   stockMovements StockMovement[]
   refreshTokens  RefreshToken[]
   activityLogs   ActivityLog[]
+  repairs        RepairTicket[]
+  tradeIns       TradeIn[]
+  expenses       Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,7 +73,7 @@ model ActivityLog {
 model Category {
   id          String    @id @default(cuid())
   nameEn      String
-  nameUr      String
+  nameUr      String?
   description String?
   image       String?
   sortOrder   Int       @default(0)
@@ -163,7 +166,9 @@ model Customer {
   isActive           Boolean  @default(true)
   notes              String?
 
-  sales Sale[]
+  sales    Sale[]
+  repairs  RepairTicket[]
+  tradeIns TradeIn[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,7 +200,7 @@ model Supplier {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PURCHASES
+// PURCHASES & SALES
 // ═════════════════════════════════════════════════════════════════════════════
 
 model Purchase {
@@ -206,7 +211,7 @@ model Purchase {
   userId         String
   user           User      @relation(fields: [userId], references: [id])
 
-  status         String    @default("DRAFT") // DRAFT, ORDERED, PARTIALLY_RECEIVED, RECEIVED, CANCELLED
+  status         String    @default("DRAFT") // DRAFT, ORDERED, RECEIVED, CANCELLED
   purchaseDate   DateTime  @default(now())
   expectedDate   DateTime?
   receivedDate   DateTime?
@@ -247,10 +252,6 @@ model PurchaseItem {
   @@map("purchase_items")
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// SALES
-// ═════════════════════════════════════════════════════════════════════════════
-
 model Sale {
   id            String    @id @default(cuid())
   invoiceNumber String    @unique
@@ -259,7 +260,7 @@ model Sale {
   userId        String
   user          User      @relation(fields: [userId], references: [id])
 
-  status        String    @default("COMPLETED") // COMPLETED, RETURNED, PARTIALLY_RETURNED, CANCELLED, HELD
+  status        String    @default("COMPLETED")
   saleDate      DateTime  @default(now())
 
   subtotal       Float
@@ -270,7 +271,7 @@ model Sale {
   changeAmount   Float    @default(0)
   dueAmount      Float    @default(0)
 
-  paymentMethod String    @default("CASH") // CASH, CARD, EASYPAISA, JAZZCASH, BANK_TRANSFER, CREDIT
+  paymentMethod String    @default("CASH")
   paymentRef    String?
   notes         String?
   offlineId     String?   @unique
@@ -304,10 +305,6 @@ model SaleItem {
   @@map("sale_items")
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// PAYMENTS & STOCK MOVEMENTS
-// ═════════════════════════════════════════════════════════════════════════════
-
 model Payment {
   id         String    @id @default(cuid())
   saleId     String?
@@ -333,7 +330,7 @@ model StockMovement {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
 
-  type          String   // PURCHASE_IN, SALE_OUT, RETURN_IN, ADJUSTMENT_IN, ADJUSTMENT_OUT
+  type          String
   quantity      Int
   balanceBefore Int
   balanceAfter  Int
@@ -346,11 +343,108 @@ model StockMovement {
   @@map("stock_movements")
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// MOBILE REPAIR WORK ORDERS (موبائل ریپئرنگ)
+// ═════════════════════════════════════════════════════════════════════════════
+
+model RepairTicket {
+  id               String    @id @default(cuid())
+  ticketNo         String    @unique
+  customerName     String
+  customerPhone    String
+  customerId       String?
+  customer         Customer? @relation(fields: [customerId], references: [id])
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+
+  deviceModel      String
+  imei             String?
+  color            String?
+  patternLock      String?
+  faultDescription String
+  technicianNotes  String?
+
+  estimatedCost    Float     @default(0)
+  advanceDeposit   Float     @default(0)
+  finalAmount      Float     @default(0)
+  status           String    @default("RECEIVED") // RECEIVED, IN_REPAIR, READY, DELIVERED, CANCELLED
+
+  deliveredAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("repair_tickets")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// USED MOBILE PHONE BUYBACK & POLICE VERIFICATION (استعمال شدہ موبائل خرید و فروخت)
+// ═════════════════════════════════════════════════════════════════════════════
+
+model TradeIn {
+  id             String    @id @default(cuid())
+  voucherNo      String    @unique
+  sellerName     String
+  sellerPhone    String
+  sellerCnic     String
+  sellerAddress  String?
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id])
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+
+  brand          String
+  modelName      String
+  imei1          String
+  imei2          String?
+  storage        String?
+  color          String?
+  conditionGrade String    @default("GRADE_A") // GRADE_A, GRADE_B, GRADE_C
+  purchasePrice  Float
+  paymentMethod  String    @default("CASH")
+
+  hasBox         Boolean   @default(true)
+  hasCharger     Boolean   @default(true)
+  hasOriginalCnicCopy Boolean @default(true)
+  policeVoucherPrinted Boolean @default(false)
+  notes          String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("trade_ins")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SHOP EXPENSES & EXPENSE CATEGORIES (دکان کے اخراجات)
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Expense {
+  id            String   @id @default(cuid())
+  title         String
+  category      String   // RENT, ELECTRICITY, SALARY, TEA_REFRESHMENT, INTERNET, REPAIR_TOOLS, OTHER
+  amount        Float
+  paymentMethod String   @default("CASH")
+  reference     String?
+  expenseDate   DateTime @default(now())
+  notes         String?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("expenses")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SYSTEM SETTINGS & DAILY Z-REPORT CASH DRAWER
+// ═════════════════════════════════════════════════════════════════════════════
+
 model Setting {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String
-  group String @default("general")
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  group     String   @default("general")
 
   updatedAt DateTime @updatedAt
 

@@ -12,13 +12,17 @@ import saleRoutes from './sale.routes.js';
 import inventoryRoutes from './inventory.routes.js';
 import reportRoutes from './report.routes.js';
 import settingRoutes from './setting.routes.js';
+import repairRoutes from './repair.routes.js';
+import tradeinRoutes from './tradein.routes.js';
+import expenseRoutes from './expense.routes.js';
+import backupRoutes from './backup.routes.js';
 
 const router = Router();
 
-// Public
+// Public Routes
 router.use('/auth', authRoutes);
 
-// Protected (auth required on each sub-router)
+// Protected Core Operations
 router.use('/users',      userRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/brands',     brandRoutes);
@@ -28,7 +32,11 @@ router.use('/suppliers',  supplierRoutes);
 router.use('/purchases',  purchaseRoutes);
 router.use('/sales',      saleRoutes);
 router.use('/inventory',  inventoryRoutes);
+router.use('/repairs',    repairRoutes);
+router.use('/trade-ins',  tradeinRoutes);
+router.use('/expenses',   expenseRoutes);
 router.use('/reports',    reportRoutes);
 router.use('/settings',   settingRoutes);
+router.use('/backup',     backupRoutes);
 
 export default router;
