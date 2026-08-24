@@ -1,16 +1,19 @@
-// client/src/pages/auth/LoginPage.jsx — Premium Minimalist Glassmorphic Login Portal
+// client/src/pages/auth/LoginPage.jsx — Dynamic Light/Dark Minimalist Glassmorphic Login Portal
 import { useState } from 'react';
 import { Form, Input, Button, message, Segmented } from 'antd';
-import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
+import { useThemeStore } from '../../store/themeStore';
 import api from '../../api/axiosInstance';
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const { mode, toggleTheme } = useThemeStore();
+  const isDark = mode === 'dark';
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
@@ -37,17 +40,22 @@ export default function LoginPage() {
       justifyContent: 'center',
       padding: 24,
       position: 'relative',
-      background: 'linear-gradient(145deg, #0b0f19 0%, #111827 50%, #0f172a 100%)',
+      background: isDark
+        ? 'linear-gradient(145deg, #090d16 0%, #111827 50%, #0f172a 100%)'
+        : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%)',
       overflow: 'hidden',
+      transition: 'background 0.3s ease',
     }}>
-      {/* Subtle Ambient Background Gradients */}
+      {/* Subtle Ambient Radial Glows */}
       <div style={{
         position: 'absolute',
         top: '-15%',
         left: '10%',
         width: 600,
         height: 600,
-        background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
+        background: isDark
+          ? 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)'
+          : 'radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 70%)',
         filter: 'blur(60px)',
         pointerEvents: 'none',
       }} />
@@ -57,7 +65,9 @@ export default function LoginPage() {
         right: '10%',
         width: 600,
         height: 600,
-        background: 'radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%)',
+        background: isDark
+          ? 'radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%)'
+          : 'radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%)',
         filter: 'blur(60px)',
         pointerEvents: 'none',
       }} />
@@ -69,14 +79,17 @@ export default function LoginPage() {
         display: 'flex',
         borderRadius: 20,
         overflow: 'hidden',
-        background: 'rgba(17, 24, 39, 0.75)',
+        background: isDark ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.88)',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
-        border: '1px solid rgba(255, 255, 255, 0.09)',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1)',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(255, 255, 255, 0.95)',
+        boxShadow: isDark
+          ? '0 25px 60px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1)'
+          : '0 25px 60px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(37, 99, 235, 0.04)',
         position: 'relative',
         zIndex: 1,
         minHeight: 480,
+        transition: 'all 0.3s ease',
       }}>
 
         {/* LEFT PANEL: Clean Minimalist Login Form */}
@@ -88,7 +101,7 @@ export default function LoginPage() {
           justifyContent: 'space-between',
         }}>
           <div>
-            {/* Top Bar: Brand & Language Switcher */}
+            {/* Top Bar: Brand, Theme Switcher & Language */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <img
@@ -99,38 +112,63 @@ export default function LoginPage() {
                     height: 42,
                     borderRadius: 10,
                     objectFit: 'cover',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)',
                   }}
                 />
                 <div>
-                  <h1 style={{ fontSize: 18, fontWeight: 800, color: '#f8fafc', margin: 0, letterSpacing: -0.2 }}>
+                  <h1 style={{
+                    fontSize: 18,
+                    fontWeight: 800,
+                    color: isDark ? '#f8fafc' : '#0f172a',
+                    margin: 0,
+                    letterSpacing: -0.2,
+                  }}>
                     Hassan Traderz
                   </h1>
-                  <span style={{ color: '#94a3b8', fontSize: 12, fontWeight: 500 }}>
+                  <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12, fontWeight: 500 }}>
                     Enterprise POS & Inventory
                   </span>
                 </div>
               </div>
 
-              <Segmented
-                options={[{ label: 'EN', value: 'en' }, { label: 'اردو', value: 'ur' }]}
-                value={i18n.language}
-                onChange={switchLang}
-                style={{
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  fontSize: 12,
-                }}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Button
+                  size="small"
+                  icon={isDark ? <SunOutlined style={{ color: '#f59e0b' }} /> : <MoonOutlined style={{ color: '#6366f1' }} />}
+                  onClick={toggleTheme}
+                  style={{
+                    borderRadius: 8,
+                    background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.9)',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                    color: isDark ? '#f8fafc' : '#0f172a',
+                  }}
+                />
+                <Segmented
+                  size="small"
+                  options={[{ label: 'EN', value: 'en' }, { label: 'اردو', value: 'ur' }]}
+                  value={i18n.language}
+                  onChange={switchLang}
+                  style={{
+                    background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.9)',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                    fontSize: 12,
+                  }}
+                />
+              </div>
             </div>
 
             {/* Form Title */}
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#f8fafc', margin: 0 }}>
+              <h2 style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: isDark ? '#f8fafc' : '#0f172a',
+                margin: 0,
+              }}>
                 Sign In
               </h2>
-              <p style={{ color: '#94a3b8', fontSize: 13, marginTop: 4, marginBottom: 0 }}>
-                Enter your credentials to access the POS system
+              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 13, marginTop: 4, marginBottom: 0 }}>
+                Enter your credentials to access the POS counter
               </p>
             </div>
 
@@ -138,14 +176,14 @@ export default function LoginPage() {
             <Form layout="vertical" onFinish={onFinish} size="large">
               <Form.Item name="username" rules={[{ required: true, message: 'Username is required' }]}>
                 <Input
-                  prefix={<UserOutlined style={{ color: '#64748b' }} />}
+                  prefix={<UserOutlined style={{ color: isDark ? '#64748b' : '#94a3b8' }} />}
                   placeholder={t('auth.username')}
                   autoComplete="username"
                   style={{
                     borderRadius: 10,
-                    background: 'rgba(30, 41, 59, 0.6)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#f8fafc',
+                    background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
+                    color: isDark ? '#f8fafc' : '#0f172a',
                     height: 46,
                   }}
                 />
@@ -153,17 +191,17 @@ export default function LoginPage() {
 
               <Form.Item name="password" rules={[{ required: true, message: 'Password is required' }]}>
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: '#64748b' }} />}
+                  prefix={<LockOutlined style={{ color: isDark ? '#64748b' : '#94a3b8' }} />}
                   placeholder={t('auth.password')}
                   autoComplete="current-password"
                   style={{
                     borderRadius: 10,
-                    background: 'rgba(30, 41, 59, 0.6)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#f8fafc',
+                    background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
+                    color: isDark ? '#f8fafc' : '#0f172a',
                     height: 46,
                   }}
-                  iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined style={{ color: '#64748b' }} />}
+                  iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined style={{ color: '#94a3b8' }} />}
                 />
               </Form.Item>
 
@@ -190,11 +228,18 @@ export default function LoginPage() {
           </div>
 
           {/* Minimal Clean Footer */}
-          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 11.5, color: '#64748b' }}>
+          <div style={{
+            marginTop: 24,
+            paddingTop: 16,
+            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span style={{ fontSize: 11.5, color: isDark ? '#64748b' : '#94a3b8' }}>
               v2.4 Commercial Edition
             </span>
-            <span style={{ fontSize: 11.5, color: '#64748b' }}>
+            <span style={{ fontSize: 11.5, color: isDark ? '#64748b' : '#94a3b8' }}>
               © {new Date().getFullYear()} Hassan Traderz
             </span>
           </div>
@@ -205,14 +250,14 @@ export default function LoginPage() {
           flex: 0.95,
           position: 'relative',
           overflow: 'hidden',
-          borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
-          background: '#090d16',
+          borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
+          background: isDark ? '#090d16' : '#0f172a',
           display: 'flex',
         }}>
           <img
             src="/login_gadgets.jpg"
             alt="Mobile POS System"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isDark ? 0.85 : 0.9 }}
           />
 
           {/* Subtle Dark Vignette & Caption */}
@@ -228,7 +273,7 @@ export default function LoginPage() {
             <h3 style={{ color: '#f8fafc', fontSize: 18, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.3 }}>
               Mobile Shop Management Suite
             </h3>
-            <p style={{ color: '#94a3b8', fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ color: '#cbd5e1', fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
               POS Billing • Inventory Control • Repair Work Orders • Khata Ledger
             </p>
           </div>
