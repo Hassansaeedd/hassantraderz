@@ -1,9 +1,13 @@
-// client/src/api/axiosInstance.js — Axios Instance with Token Handling
+// client/src/api/axiosInstance.js — Axios Instance with Token Handling & Dynamic Production URL
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+const apiBaseUrl = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : '/api/v1';
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: apiBaseUrl,
   timeout: 30000,
   withCredentials: true,
 });
