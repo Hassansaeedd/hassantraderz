@@ -1,9 +1,8 @@
-// client/src/components/layout/Sidebar.jsx — Unique Glassmorphic Minimal Sidebar with Official Logo
+// client/src/components/layout/Sidebar.jsx — Sleek Minimal Glassmorphic Sidebar
 import { Layout } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
-import { useThemeStore } from '../../store/themeStore';
 import {
   DashboardOutlined, ShoppingCartOutlined, AppstoreOutlined,
   ShoppingOutlined, TeamOutlined, TruckOutlined,
@@ -18,7 +17,6 @@ export default function Sidebar({ collapsed }) {
   const navigate    = useNavigate();
   const location    = useLocation();
   const { user }    = useAuthStore();
-  const { mode }    = useThemeStore();
 
   const isAdmin   = user?.role === 'ADMIN';
   const isManager = ['ADMIN', 'MANAGER'].includes(user?.role);
@@ -61,31 +59,30 @@ export default function Sidebar({ collapsed }) {
     >
       {/* Brand Emblem / Official Logo */}
       <div style={{
-        padding: collapsed ? '16px 8px' : '20px 16px',
+        padding: collapsed ? '16px 8px' : '18px 16px',
         borderBottom: '1px solid var(--border)',
-        marginBottom: 12,
+        marginBottom: 8,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/logo.png"
             alt="Hassan Traderz Logo"
             style={{
-              width: collapsed ? 36 : 42,
-              height: collapsed ? 36 : 42,
-              borderRadius: 12,
+              width: collapsed ? 34 : 38,
+              height: collapsed ? 34 : 38,
+              borderRadius: 8,
               objectFit: 'cover',
               flexShrink: 0,
-              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
+              border: '1px solid var(--border)',
             }}
           />
           {!collapsed && (
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text)', lineHeight: 1.2, letterSpacing: 0.5 }}>
+              <div style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--text)', lineHeight: 1.2, letterSpacing: -0.2 }}>
                 {i18n.language === 'ur' ? 'حسن ٹریڈرز' : 'Hassan Traderz'}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, marginTop: 2 }}>
-                Industrial POS v2.4
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
+                POS Suite v2.4
               </div>
             </div>
           )}
@@ -99,8 +96,8 @@ export default function Sidebar({ collapsed }) {
             if (collapsed) return null;
             return (
               <div key={idx} style={{
-                padding: '16px 16px 6px', fontSize: 10, fontWeight: 700,
-                color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.2,
+                padding: '14px 14px 4px', fontSize: 10, fontWeight: 700,
+                color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1,
               }}>
                 {item.label}
               </div>
@@ -115,13 +112,8 @@ export default function Sidebar({ collapsed }) {
               className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
               onClick={() => navigate(item.key)}
               title={collapsed ? item.label : undefined}
-              style={item.highlight && !isActive ? {
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                color: 'var(--primary)',
-              } : undefined}
             >
-              <span style={{ fontSize: 18, display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: 17, display: 'flex', alignItems: 'center' }}>
                 {item.icon}
               </span>
               {!collapsed && (

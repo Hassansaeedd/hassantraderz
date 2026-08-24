@@ -1,9 +1,9 @@
-// client/src/components/layout/AppLayout.jsx — Header Bar with Theme Toggle & Software Licensing Button
+// client/src/components/layout/AppLayout.jsx — Professional Header Bar & Theme Navigation
 import { useState } from 'react';
-import { Layout, Button, Dropdown, Space, Avatar, Tag, Drawer } from 'antd';
+import { Layout, Button, Dropdown, Space, Avatar, Drawer } from 'antd';
 import {
   MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined,
-  LogoutOutlined, SunOutlined, MoonOutlined, SafetyCertificateOutlined,
+  LogoutOutlined, SunOutlined, MoonOutlined,
   KeyOutlined
 } from '@ant-design/icons';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -34,8 +34,8 @@ export default function AppLayout() {
     {
       key: 'profile',
       label: (
-        <div>
-          <div style={{ fontWeight: 700 }}>{user?.fullName}</div>
+        <div style={{ padding: '4px 0' }}>
+          <div style={{ fontWeight: 700, color: 'var(--text)' }}>{user?.fullName}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{user?.role}</div>
         </div>
       ),
@@ -59,7 +59,7 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      {/* Desktop Glass Sidebar */}
+      {/* Desktop Sidebar */}
       <div className="desktop-sidebar" style={{ display: 'block' }}>
         <Sidebar collapsed={collapsed} />
       </div>
@@ -69,7 +69,7 @@ export default function AppLayout() {
         placement="left"
         onClose={() => setMobileVisible(false)}
         open={mobileVisible}
-        bodyStyle={{ padding: 0, background: 'rgba(15, 23, 42, 0.95)' }}
+        bodyStyle={{ padding: 0, background: 'var(--bg-base)' }}
         width={240}
       >
         <Sidebar collapsed={false} />
@@ -89,62 +89,62 @@ export default function AppLayout() {
           borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           position: 'sticky', top: 0, zIndex: 100,
-          height: 64,
+          height: 60,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
-              style={{ fontSize: 18, color: 'var(--text)' }}
+              style={{ fontSize: 16, color: 'var(--text)' }}
             />
           </div>
 
           <Space size="middle">
-            {/* License Status Pill Button */}
+            {/* License Status Button */}
             <Button
               icon={<KeyOutlined style={{ color: 'var(--primary)' }} />}
               onClick={() => setLicenseOpen(true)}
               style={{
-                borderRadius: 20,
-                borderColor: 'rgba(16, 185, 129, 0.4)',
-                background: 'rgba(16, 185, 129, 0.1)',
-                color: 'var(--primary)',
-                fontWeight: 700,
-                fontSize: 12,
+                borderRadius: 8,
+                borderColor: 'var(--border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text)',
+                fontWeight: 600,
+                fontSize: 12.5,
               }}
             >
-              Enterprise License
+              License Active
             </Button>
 
             {/* Light / Dark Mode Toggle Button */}
             <Button
-              icon={mode === 'dark' ? <SunOutlined style={{ color: '#f59e0b' }} /> : <MoonOutlined style={{ color: '#8b5cf6' }} />}
+              icon={mode === 'dark' ? <SunOutlined style={{ color: '#f59e0b' }} /> : <MoonOutlined style={{ color: '#6366f1' }} />}
               onClick={toggleTheme}
               style={{
-                borderRadius: 20,
-                fontWeight: 700,
+                borderRadius: 8,
+                fontWeight: 600,
                 borderColor: 'var(--border)',
                 background: 'var(--bg-elevated)',
                 color: 'var(--text)',
               }}
             >
-              {mode === 'dark' ? '☀️ Light' : '🌙 Dark'}
+              {mode === 'dark' ? 'Light' : 'Dark'}
             </Button>
 
             {/* Language Switcher */}
             <Button
               onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'ur' : 'en')}
-              style={{ borderRadius: 20, fontWeight: 700 }}
+              style={{ borderRadius: 8, fontWeight: 600, borderColor: 'var(--border)', background: 'var(--bg-elevated)', color: 'var(--text)' }}
             >
               {i18n.language === 'en' ? 'اردو' : 'English'}
             </Button>
 
             {/* Staff User Profile Dropdown */}
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Avatar icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
-                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{user?.fullName}</span>
+              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', borderRadius: 8 }}>
+                <Avatar icon={<UserOutlined />} style={{ background: 'var(--primary)' }} size="small" />
+                <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 13 }}>{user?.fullName}</span>
               </div>
             </Dropdown>
           </Space>
