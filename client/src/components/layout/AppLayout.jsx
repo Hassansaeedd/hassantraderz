@@ -1,12 +1,12 @@
-// client/src/components/layout/AppLayout.jsx — Professional Header Bar & Theme Navigation
-import { useState } from 'react';
+// client/src/components/layout/AppLayout.jsx — Fluid Responsive Header Bar & Drawer Navigation
+import { useState, useEffect } from 'react';
 import { Layout, Button, Dropdown, Space, Avatar, Drawer } from 'antd';
 import {
   MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined,
   LogoutOutlined, SunOutlined, MoonOutlined,
-  KeyOutlined
+  KeyOutlined, MenuOutlined
 } from '@ant-design/icons';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
@@ -18,12 +18,33 @@ const { Header, Content } = Layout;
 export default function AppLayout() {
   const { t, i18n }  = useTranslation();
   const navigate      = useNavigate();
+  const location      = useLocation();
   const { user, logout } = useAuthStore();
   const { mode, toggleTheme } = useThemeStore();
 
   const [collapsed, setCollapsed]         = useState(false);
   const [mobileVisible, setMobileVisible] = useState(false);
   const [licenseOpen, setLicenseOpen]     = useState(false);
+  const [isMobile, setIsMobile]           = useState(window.innerWidth <= 992);
+
+  // Monitor window resize for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 992;
+      setIsMobile(mobile);
+      if (mobile) {
+        setCollapsed(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    setMobileVisible(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -57,65 +78,95 @@ export default function AppLayout() {
     },
   ];
 
+  const handleToggleNav = () => {
+    if (isMobile) {
+      setMobileVisible(!mobileVisible);
+    } else {
+      setCollapsed(!collapsed);
+    }
+  };
+
   return (
-    <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      {/* Desktop Sidebar */}
-      <div className="desktop-sidebar" style={{ display: 'block' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)', width: '100%', overflowX: 'hidden' }}>
+      {/* Desktop Sidebar (Rendered on >= 992px) */}
+      <div className="desktop-sidebar">
         <Sidebar collapsed={collapsed} />
       </div>
 
-      {/* Mobile Sidebar Drawer */}
+      {/* Mobile / Tablet Drawer Sidebar (< 992px) */}
       <Drawer
         placement="left"
         onClose={() => setMobileVisible(false)}
         open={mobileVisible}
-        bodyStyle={{ padding: 0, background: 'var(--bg-base)' }}
-        width={240}
+        bodyStyle={{ padding: 0, background: 'var(--sidebar-bg)' }}
+        width={260}
+        closable={false}
       >
-        <Sidebar collapsed={false} />
+        <Sidebar collapsed={false} onNavClick={() => setMobileVisible(false)} />
       </Drawer>
 
-      <Layout style={{
-        marginInlineStart: collapsed ? 80 : 240,
-        transition: 'margin-inline-start 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        background: 'transparent',
-      }}>
-        {/* Header Toolbar */}
-        <Header style={{
-          padding: '0 24px',
-          background: 'var(--header-bg)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          position: 'sticky', top: 0, zIndex: 100,
-          height: 60,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      {/* Main Workspace Layout */}
+      <Layout
+        className="main-layout-container"
+        style={{
+          marginInlineStart: isMobile ? 0 : (collapsed ? 80 : 240),
+          transition: 'margin-inline-start 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'transparent',
+          minWidth: 0,
+        }}
+      >
+        {/* Responsive Header Bar */}
+        <Header
+          className="app-header"
+          style={{
+            background: 'var(--header-bg)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+            height: 60,
+          }}
+        >
+          {/* Left: Navigation Toggle Button & Brand title on mobile */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Button
               type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              style={{ fontSize: 16, color: 'var(--text)' }}
+              icon={isMobile ? <MenuOutlined /> : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)}
+              onClick={handleToggleNav}
+              style={{ fontSize: 18, color: 'var(--text)', padding: '4px 8px' }}
             />
+
+            {isMobile && (
+              <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', letterSpacing: -0.2 }}>
+                Hassan Traderz
+              </span>
+            )}
           </div>
 
-          <Space size="middle">
+          {/* Right: Quick Actions & Profile */}
+          <Space size={isMobile ? 6 : 'middle'}>
             {/* License Status Button */}
-            <Button
-              icon={<KeyOutlined style={{ color: 'var(--primary)' }} />}
-              onClick={() => setLicenseOpen(true)}
-              style={{
-                borderRadius: 8,
-                borderColor: 'var(--border)',
-                background: 'var(--bg-elevated)',
-                color: 'var(--text)',
-                fontWeight: 600,
-                fontSize: 12.5,
-              }}
-            >
-              License Active
-            </Button>
+            {!isMobile && (
+              <Button
+                icon={<KeyOutlined style={{ color: 'var(--primary)' }} />}
+                onClick={() => setLicenseOpen(true)}
+                style={{
+                  borderRadius: 8,
+                  borderColor: 'var(--border)',
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text)',
+                  fontWeight: 600,
+                  fontSize: 12.5,
+                }}
+              >
+                License Active
+              </Button>
+            )}
 
             {/* Light / Dark Mode Toggle Button */}
             <Button
@@ -127,31 +178,41 @@ export default function AppLayout() {
                 borderColor: 'var(--border)',
                 background: 'var(--bg-elevated)',
                 color: 'var(--text)',
+                padding: isMobile ? '4px 10px' : undefined,
               }}
             >
-              {mode === 'dark' ? 'Light' : 'Dark'}
+              <span className="header-btn-text">{mode === 'dark' ? 'Light' : 'Dark'}</span>
             </Button>
 
             {/* Language Switcher */}
             <Button
               onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'ur' : 'en')}
-              style={{ borderRadius: 8, fontWeight: 600, borderColor: 'var(--border)', background: 'var(--bg-elevated)', color: 'var(--text)' }}
+              style={{
+                borderRadius: 8,
+                fontWeight: 600,
+                borderColor: 'var(--border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text)',
+                padding: isMobile ? '4px 10px' : undefined,
+              }}
             >
-              {i18n.language === 'en' ? 'اردو' : 'English'}
+              {i18n.language === 'en' ? 'اردو' : 'EN'}
             </Button>
 
             {/* Staff User Profile Dropdown */}
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', borderRadius: 8 }}>
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, padding: '4px 6px', borderRadius: 8 }}>
                 <Avatar icon={<UserOutlined />} style={{ background: 'var(--primary)' }} size="small" />
-                <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 13 }}>{user?.fullName}</span>
+                {!isMobile && (
+                  <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 13 }}>{user?.fullName}</span>
+                )}
               </div>
             </Dropdown>
           </Space>
         </Header>
 
-        {/* Workspace Content Viewport */}
-        <Content style={{ padding: 24, minHeight: 280 }}>
+        {/* Responsive Workspace Content Viewport */}
+        <Content className="app-content-viewport" style={{ minHeight: 280 }}>
           <Outlet />
         </Content>
       </Layout>

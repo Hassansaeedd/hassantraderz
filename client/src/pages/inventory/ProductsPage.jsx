@@ -235,7 +235,7 @@ Fast Charger 65W,فاسٹ چارجر,ACC-FC65-04,69218000044,1200,2200,30,5`;
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
         <div>
           <Title level={3} style={{ color: 'var(--text)', margin: 0, fontWeight: 800 }}>
             <AppstoreOutlined style={{ color: 'var(--primary)', marginRight: 10 }} />
@@ -246,7 +246,7 @@ Fast Charger 65W,فاسٹ چارجر,ACC-FC65-04,69218000044,1200,2200,30,5`;
           </Text>
         </div>
 
-        <Space>
+        <Space style={{ marginTop: 10 }}>
           <Button
             icon={<FileExcelOutlined style={{ color: '#10b981' }} />}
             onClick={() => setCsvModalVisible(true)}
@@ -303,6 +303,7 @@ Fast Charger 65W,فاسٹ چارجر,ACC-FC65-04,69218000044,1200,2200,30,5`;
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           ...pagination,
           onChange: (page, pageSize) => fetchProducts(page, pageSize),

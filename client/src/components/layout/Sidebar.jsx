@@ -12,7 +12,7 @@ import {
 
 const { Sider } = Layout;
 
-export default function Sidebar({ collapsed }) {
+export default function Sidebar({ collapsed, onNavClick }) {
   const { t, i18n } = useTranslation();
   const navigate    = useNavigate();
   const location    = useLocation();
@@ -43,17 +43,20 @@ export default function Sidebar({ collapsed }) {
 
   const activeKey = '/' + location.pathname.split('/')[1];
 
+  const handleItemClick = (key) => {
+    navigate(key);
+    if (onNavClick) onNavClick();
+  };
+
   return (
     <Sider
       collapsed={collapsed}
       width={240}
       className="glass-sidebar"
       style={{
-        position: 'fixed',
-        height: '100vh',
+        height: '100%',
+        minHeight: '100vh',
         overflow: 'auto',
-        insetInlineStart: 0,
-        top: 0, bottom: 0,
         zIndex: 200,
       }}
     >
@@ -110,7 +113,7 @@ export default function Sidebar({ collapsed }) {
             <div
               key={item.key}
               className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => navigate(item.key)}
+              onClick={() => handleItemClick(item.key)}
               title={collapsed ? item.label : undefined}
             >
               <span style={{ fontSize: 17, display: 'flex', alignItems: 'center' }}>

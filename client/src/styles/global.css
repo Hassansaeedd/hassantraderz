@@ -1,4 +1,4 @@
-/* client/src/styles/global.css — Professional Minimalist Glassmorphic Design System */
+/* client/src/styles/global.css — Professional Minimalist Glassmorphic Design System & Responsive Framework */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 
@@ -85,7 +85,8 @@
 }
 
 html, body {
-  height: 100%;
+  min-height: 100%;
+  width: 100%;
   background: var(--bg-base);
   color: var(--text);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -93,6 +94,7 @@ html, body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
@@ -104,8 +106,10 @@ html[dir="rtl"] body {
 }
 
 #root {
-  height: 100%;
+  min-height: 100vh;
+  width: 100%;
   position: relative;
+  overflow-x: hidden;
 }
 
 /* Clean Minimal Scrollbars */
@@ -141,14 +145,18 @@ html[dir="rtl"] body {
 
 .ant-card-head {
   border-bottom: 1px solid var(--border) !important;
-  min-height: 48px !important;
-  padding: 0 18px !important;
+  min-height: 46px !important;
+  padding: 0 16px !important;
 }
 
 .ant-card-head-title {
   color: var(--text) !important;
   font-weight: 700 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
+}
+
+.ant-card-body {
+  padding: 16px !important;
 }
 
 /* Refined KPI Metric Cards */
@@ -158,7 +166,7 @@ html[dir="rtl"] body {
   -webkit-backdrop-filter: blur(20px);
   border: var(--glass-border);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 16px 20px;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -230,15 +238,19 @@ html[dir="rtl"] body {
   background: var(--primary) !important;
 }
 
-/* Clean Tables */
+/* Clean Tables with Smooth Responsive Scrolling */
 .ant-table-wrapper {
   background: transparent !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .ant-table {
   background: var(--glass-bg) !important;
   border-radius: var(--radius-md) !important;
   overflow: hidden;
+  min-width: 100%;
 }
 
 .ant-table-thead > tr > th {
@@ -249,12 +261,14 @@ html[dir="rtl"] body {
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
   border-bottom: 1px solid var(--border) !important;
+  white-space: nowrap !important;
 }
 
 .ant-table-tbody > tr > td {
   border-bottom: 1px solid var(--border) !important;
   color: var(--text) !important;
   font-size: 13.5px !important;
+  padding: 12px 14px !important;
 }
 
 .ant-table-tbody > tr:hover > td {
@@ -317,4 +331,94 @@ html[dir="rtl"] body {
 
 .fade-in {
   animation: fadeIn 0.2s ease-out;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE MEDIA QUERIES (MOBILE, TABLET, DESKTOP)
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet & Below (<= 992px) */
+@media (max-width: 992px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  .main-layout-container {
+    margin-inline-start: 0 !important;
+    width: 100% !important;
+  }
+
+  .app-header {
+    padding: 0 16px !important;
+  }
+
+  .app-content-viewport {
+    padding: 16px !important;
+  }
+
+  .kpi-card {
+    padding: 14px 16px;
+  }
+}
+
+/* Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 12px !important;
+    height: 56px !important;
+  }
+
+  .app-content-viewport {
+    padding: 12px !important;
+  }
+
+  .header-btn-text {
+    display: none !important;
+  }
+
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  .ant-card-head {
+    padding: 0 12px !important;
+    min-height: 42px !important;
+  }
+
+  .ant-modal {
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px auto !important;
+  }
+
+  .ant-modal-content {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Stacked Flex Headers */
+  .page-header-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .page-header-flex > button {
+    width: 100% !important;
+  }
+}
+
+/* Small Smartphone Screen (<= 576px) */
+@media (max-width: 576px) {
+  .app-content-viewport {
+    padding: 10px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 10px 10px !important;
+    font-size: 12.5px !important;
+  }
+
+  .ant-btn {
+    font-size: 13px !important;
+  }
 }

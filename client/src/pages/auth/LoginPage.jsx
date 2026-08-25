@@ -1,5 +1,5 @@
-// client/src/pages/auth/LoginPage.jsx — Dynamic Light/Dark Minimalist Glassmorphic Login Portal
-import { useState } from 'react';
+// client/src/pages/auth/LoginPage.jsx — Dynamic Light/Dark Responsive Minimalist Glassmorphic Login Portal
+import { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Segmented } from 'antd';
 import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,13 @@ export default function LoginPage() {
   const { mode, toggleTheme } = useThemeStore();
   const isDark = mode === 'dark';
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -35,10 +42,11 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
+      width: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 24,
+      padding: isMobile ? 12 : 24,
       position: 'relative',
       background: isDark
         ? 'linear-gradient(145deg, #090d16 0%, #111827 50%, #0f172a 100%)'
@@ -72,14 +80,15 @@ export default function LoginPage() {
         pointerEvents: 'none',
       }} />
 
-      {/* Main Glassmorphic Split Container */}
+      {/* Main Glassmorphic Split / Mobile Container */}
       <div style={{
         width: '100%',
-        maxWidth: 920,
+        maxWidth: isMobile ? 440 : 920,
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         borderRadius: 20,
         overflow: 'hidden',
-        background: isDark ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.88)',
+        background: isDark ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.92)',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
         border: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(255, 255, 255, 0.95)',
@@ -88,28 +97,28 @@ export default function LoginPage() {
           : '0 25px 60px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(37, 99, 235, 0.04)',
         position: 'relative',
         zIndex: 1,
-        minHeight: 480,
+        minHeight: isMobile ? 'auto' : 480,
         transition: 'all 0.3s ease',
       }}>
 
         {/* LEFT PANEL: Clean Minimalist Login Form */}
         <div style={{
           flex: 1.1,
-          padding: '44px 40px',
+          padding: isMobile ? '28px 20px' : '44px 40px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
         }}>
           <div>
             {/* Top Bar: Brand, Theme Switcher & Language */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 20 : 28 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <img
                   src="/logo.png"
                   alt="Hassan Traderz Logo"
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: isMobile ? 36 : 42,
+                    height: isMobile ? 36 : 42,
                     borderRadius: 10,
                     objectFit: 'cover',
                     border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)',
@@ -117,7 +126,7 @@ export default function LoginPage() {
                 />
                 <div>
                   <h1 style={{
-                    fontSize: 18,
+                    fontSize: isMobile ? 16 : 18,
                     fontWeight: 800,
                     color: isDark ? '#f8fafc' : '#0f172a',
                     margin: 0,
@@ -125,13 +134,13 @@ export default function LoginPage() {
                   }}>
                     Hassan Traderz
                   </h1>
-                  <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12, fontWeight: 500 }}>
-                    Enterprise POS & Inventory
+                  <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 11.5, fontWeight: 500 }}>
+                    Enterprise POS Suite
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Button
                   size="small"
                   icon={isDark ? <SunOutlined style={{ color: '#f59e0b' }} /> : <MoonOutlined style={{ color: '#6366f1' }} />}
@@ -151,23 +160,23 @@ export default function LoginPage() {
                   style={{
                     background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.9)',
                     border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
-                    fontSize: 12,
+                    fontSize: 11.5,
                   }}
                 />
               </div>
             </div>
 
             {/* Form Title */}
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: isMobile ? 18 : 24 }}>
               <h2 style={{
-                fontSize: 20,
+                fontSize: isMobile ? 18 : 20,
                 fontWeight: 700,
                 color: isDark ? '#f8fafc' : '#0f172a',
                 margin: 0,
               }}>
                 Sign In
               </h2>
-              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 13, marginTop: 4, marginBottom: 0 }}>
+              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12.5, marginTop: 3, marginBottom: 0 }}>
                 Enter your credentials to access the POS counter
               </p>
             </div>
@@ -184,7 +193,7 @@ export default function LoginPage() {
                     background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
                     border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
                     color: isDark ? '#f8fafc' : '#0f172a',
-                    height: 46,
+                    height: 44,
                   }}
                 />
               </Form.Item>
@@ -199,20 +208,20 @@ export default function LoginPage() {
                     background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
                     border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
                     color: isDark ? '#f8fafc' : '#0f172a',
-                    height: 46,
+                    height: 44,
                   }}
                   iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined style={{ color: '#94a3b8' }} />}
                 />
               </Form.Item>
 
-              <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
+              <Form.Item style={{ marginTop: 20, marginBottom: 0 }}>
                 <Button
                   type="primary"
                   htmlType="submit"
                   block
                   loading={loading}
                   style={{
-                    height: 46,
+                    height: 44,
                     borderRadius: 10,
                     fontSize: 14,
                     fontWeight: 700,
@@ -229,55 +238,57 @@ export default function LoginPage() {
 
           {/* Minimal Clean Footer */}
           <div style={{
-            marginTop: 24,
-            paddingTop: 16,
+            marginTop: 20,
+            paddingTop: 14,
             borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}>
-            <span style={{ fontSize: 11.5, color: isDark ? '#64748b' : '#94a3b8' }}>
+            <span style={{ fontSize: 11, color: isDark ? '#64748b' : '#94a3b8' }}>
               v2.4 Commercial Edition
             </span>
-            <span style={{ fontSize: 11.5, color: isDark ? '#64748b' : '#94a3b8' }}>
+            <span style={{ fontSize: 11, color: isDark ? '#64748b' : '#94a3b8' }}>
               © {new Date().getFullYear()} Hassan Traderz
             </span>
           </div>
         </div>
 
-        {/* RIGHT PANEL: Tech Artwork Showcase */}
-        <div style={{
-          flex: 0.95,
-          position: 'relative',
-          overflow: 'hidden',
-          borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
-          background: isDark ? '#090d16' : '#0f172a',
-          display: 'flex',
-        }}>
-          <img
-            src="/login_gadgets.jpg"
-            alt="Mobile POS System"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isDark ? 0.85 : 0.9 }}
-          />
-
-          {/* Subtle Dark Vignette & Caption */}
+        {/* RIGHT PANEL: Tech Artwork Showcase (Only on Desktop >= 768px) */}
+        {!isMobile && (
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(11, 15, 25, 0.1) 0%, rgba(11, 15, 25, 0.85) 100%)',
+            flex: 0.95,
+            position: 'relative',
+            overflow: 'hidden',
+            borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
+            background: isDark ? '#090d16' : '#0f172a',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            padding: 32,
           }}>
-            <h3 style={{ color: '#f8fafc', fontSize: 18, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.3 }}>
-              Mobile Shop Management Suite
-            </h3>
-            <p style={{ color: '#cbd5e1', fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
-              POS Billing • Inventory Control • Repair Work Orders • Khata Ledger
-            </p>
+            <img
+              src="/login_gadgets.jpg"
+              alt="Mobile POS System"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isDark ? 0.85 : 0.9 }}
+            />
+
+            {/* Subtle Dark Vignette & Caption */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(11, 15, 25, 0.1) 0%, rgba(11, 15, 25, 0.85) 100%)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              padding: 32,
+            }}>
+              <h3 style={{ color: '#f8fafc', fontSize: 18, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.3 }}>
+                Mobile Shop Management Suite
+              </h3>
+              <p style={{ color: '#cbd5e1', fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
+                POS Billing • Inventory Control • Repair Work Orders • Khata Ledger
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
