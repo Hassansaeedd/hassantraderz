@@ -19,8 +19,9 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
   const location    = useLocation();
   const { user }    = useAuthStore();
 
-  const isAdmin   = user?.role === 'ADMIN';
-  const isManager = ['ADMIN', 'MANAGER'].includes(user?.role);
+  const isSuperAdmin = user?.username === 'Hassan@009' || user?.role === 'SUPERADMIN';
+  const isAdmin      = user?.role === 'ADMIN' || isSuperAdmin;
+  const isManager    = ['ADMIN', 'MANAGER', 'SUPERADMIN'].includes(user?.role) || isSuperAdmin;
 
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: t('nav.dashboard') },
@@ -39,7 +40,7 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
     { type: 'divider',   label: 'Management', hidden: !isManager },
     { key: '/reports',   icon: <BarChartOutlined />,  label: t('nav.reports'),  hidden: !isManager },
     { key: '/users',     icon: <UserOutlined />,      label: t('nav.users'),    hidden: !isAdmin },
-    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses', hidden: !isAdmin },
+    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses', hidden: !isSuperAdmin },
     { key: '/settings',  icon: <SettingOutlined />,   label: t('nav.settings'), hidden: !isAdmin },
   ].filter(item => !item.hidden);
 

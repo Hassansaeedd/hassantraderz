@@ -1,54 +1,13 @@
-// prisma/seed.js — Comprehensive Seeder for Mobile Shop POS (Pakistan) with 500+ Products
+// server/prisma/seedProducts500.js — Seeds 500+ Comprehensive Mobile Shop & Accessory Products
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log('🚀 Starting 500+ Mobile Shop Product Seeder...');
 
-  // ── 1. Super Admin User (Hassan@009 / shopco@123) ──────────────────────────
-  const adminPassword = await bcrypt.hash('shopco@123', 12);
-  const admin = await prisma.user.upsert({
-    where: { username: 'Hassan@009' },
-    update: { passwordHash: adminPassword, role: 'ADMIN', status: 'ACTIVE' },
-    create: {
-      username: 'Hassan@009',
-      email: 'admin@hassantraderz.com',
-      passwordHash: adminPassword,
-      fullName: 'Hassan Saeed (Super Admin)',
-      role: 'ADMIN',
-      status: 'ACTIVE',
-    },
-  });
-  console.log('✅ Super Admin ready: Hassan@009');
-
-  // ── 2. Settings ────────────────────────────────────────────────────────────
-  const settings = [
-    { key: 'shop_name',           value: 'Hassan Traderz POS',     group: 'general' },
-    { key: 'shop_name_ur',        value: 'حسن ٹریڈرز پی او ایس',   group: 'general' },
-    { key: 'shop_address',        value: 'Mobile Market, Pakistan',group: 'general' },
-    { key: 'shop_phone',          value: '+92-300-0000000',        group: 'general' },
-    { key: 'currency',            value: 'PKR',                    group: 'general' },
-    { key: 'currency_symbol',     value: '₨',                      group: 'general' },
-    { key: 'default_language',    value: 'en',                     group: 'general' },
-    { key: 'receipt_width',       value: '80',                     group: 'receipt' },
-    { key: 'receipt_header',      value: 'Hassan Traderz POS',     group: 'receipt' },
-    { key: 'receipt_footer_en',   value: 'Thank you for shopping with us!', group: 'receipt' },
-    { key: 'receipt_footer_ur',   value: 'ہماری دکان سے خریداری کا شکریہ!', group: 'receipt' },
-    { key: 'low_stock_threshold', value: '5',                      group: 'inventory' },
-  ];
-
-  for (const s of settings) {
-    await prisma.setting.upsert({
-      where: { key: s.key },
-      update: {},
-      create: s,
-    });
-  }
-  console.log('✅ Settings seeded');
-
-  // ── 3. Categories ──────────────────────────────────────────────────────────
+  // 1. Ensure Categories exist
   const categoriesList = [
     { nameEn: 'Smartphones', nameUr: 'اسمارٹ فون', sortOrder: 1 },
     { nameEn: 'Feature Phones', nameUr: 'فیچر فون', sortOrder: 2 },
@@ -69,9 +28,8 @@ async function main() {
     }
     catMap[cat.nameEn] = existing.id;
   }
-  console.log('✅ Categories seeded');
 
-  // ── 4. Brands ──────────────────────────────────────────────────────────────
+  // 2. Ensure Brands exist
   const brandsList = [
     'Apple', 'Samsung', 'Xiaomi', 'Oppo', 'Vivo', 'Realme',
     'Infinix', 'Tecno', 'Nokia', 'OnePlus', 'Anker', 'Baseus',
@@ -86,12 +44,11 @@ async function main() {
     }
     brandMap[b] = existing.id;
   }
-  console.log('✅ Brands seeded');
 
-  // ── 5. Catalog of 500+ Mobile Shop Products ───────────────────────────────
+  // 3. Generate Catalog of 500+ realistic products
   const products = [];
 
-  // A. Smartphones (70 Items)
+  // ─── A. SMARTPHONES & FEATURE PHONES (70 Items) ───
   const phoneModels = [
     { name: 'iPhone 15 Pro Max 256GB', brand: 'Apple', cost: 450000, price: 495000, sku: 'MOB-IP15PM-256' },
     { name: 'iPhone 15 Pro 128GB', brand: 'Apple', cost: 380000, price: 420000, sku: 'MOB-IP15P-128' },
@@ -153,7 +110,7 @@ async function main() {
     });
   });
 
-  // B. Chargers (80 Items)
+  // ─── B. CHARGERS, ADAPTERS & FAST DOCKS (80 Items) ───
   const chargerTypes = [
     { name: 'Apple 20W USB-C Power Adapter (Original Box)', brand: 'Apple', cost: 3200, price: 4500, sku: 'CHG-AP-20W' },
     { name: 'Apple 30W USB-C Fast Adapter', brand: 'Apple', cost: 4800, price: 6500, sku: 'CHG-AP-30W' },
@@ -192,7 +149,7 @@ async function main() {
     });
   });
 
-  // C. Cables (70 Items)
+  // ─── C. CHARGING & DATA CABLES (70 Items) ───
   const cableModels = [
     { name: 'Apple Original Type-C to Lightning Cable (1m)', brand: 'Apple', cost: 1400, price: 2200, sku: 'CAB-AP-CL-1M' },
     { name: 'Apple Braided USB-C to USB-C 60W Cable (1m)', brand: 'Apple', cost: 1600, price: 2500, sku: 'CAB-AP-CC-1M' },
@@ -227,18 +184,24 @@ async function main() {
     });
   });
 
-  // D. Audio & Earbuds (80 Items)
+  // ─── D. WIRELESS EARBUDS & HEADPHONES (80 Items) ───
   const audioModels = [
-    { name: 'Apple AirPods Pro (2nd Gen MagSafe USB-C)', brand: 'Apple', cost: 58000, price: 66000, sku: 'AUD-AP-PRO2' },
-    { name: 'Apple AirPods (3rd Generation)', brand: 'Apple', cost: 42000, price: 48000, sku: 'AUD-AP-3RD' },
-    { name: 'Samsung Galaxy Buds2 Pro ANC', brand: 'Samsung', cost: 28000, price: 34500, sku: 'AUD-SAM-BUDS2P' },
-    { name: 'Anker Soundcore Liberty 4 NC Wireless', brand: 'Anker', cost: 18500, price: 23500, sku: 'AUD-ANK-LIB4NC' },
-    { name: 'Anker Soundcore R50i True Wireless', brand: 'Anker', cost: 3900, price: 5400, sku: 'AUD-ANK-R50I' },
-    { name: 'Ronin R-520 Gaming Wireless Earbuds', brand: 'Ronin', cost: 3200, price: 4600, sku: 'AUD-RON-R520' },
-    { name: 'Ronin R-770 Heavy Bass Earbuds', brand: 'Ronin', cost: 2800, price: 3999, sku: 'AUD-RON-R770' },
-    { name: 'Audionic Airbud 550 Quad Mic', brand: 'Audionic', cost: 3400, price: 4800, sku: 'AUD-AUD-AB550' },
-    { name: 'Faster TG-300 TWS Gaming Earbuds', brand: 'Faster', cost: 2600, price: 3800, sku: 'AUD-FAS-TG300' },
+    { name: 'Apple AirPods Pro (2nd Generation with MagSafe/USB-C)', brand: 'Apple', cost: 58000, price: 66000, sku: 'AUD-AP-PRO2' },
+    { name: 'Apple AirPods (3rd Generation Lightning)', brand: 'Apple', cost: 42000, price: 48000, sku: 'AUD-AP-3RD' },
+    { name: 'Samsung Galaxy Buds2 Pro Active Noise Cancelling', brand: 'Samsung', cost: 28000, price: 34500, sku: 'AUD-SAM-BUDS2P' },
+    { name: 'Samsung Galaxy Buds FE ANC Earbuds', brand: 'Samsung', cost: 16500, price: 21000, sku: 'AUD-SAM-BUDSFE' },
+    { name: 'Anker Soundcore Liberty 4 NC Wireless Earbuds', brand: 'Anker', cost: 18500, price: 23500, sku: 'AUD-ANK-LIB4NC' },
+    { name: 'Anker Soundcore R50i True Wireless Earbuds', brand: 'Anker', cost: 3900, price: 5400, sku: 'AUD-ANK-R50I' },
+    { name: 'Anker Soundcore Life P2i Deep Bass Earbuds', brand: 'Anker', cost: 4800, price: 6500, sku: 'AUD-ANK-P2I' },
+    { name: 'Ronin R-520 True Wireless Gaming Earbuds', brand: 'Ronin', cost: 3200, price: 4600, sku: 'AUD-RON-R520' },
+    { name: 'Ronin R-770 Heavy Bass Wireless Earbuds', brand: 'Ronin', cost: 2800, price: 3999, sku: 'AUD-RON-R770' },
+    { name: 'Ronin R-970 ENC Clear Voice Earbuds', brand: 'Ronin', cost: 3500, price: 4999, sku: 'AUD-RON-R970' },
+    { name: 'Audionic Airbud 550 Wireless Earbuds Quad Mic', brand: 'Audionic', cost: 3400, price: 4800, sku: 'AUD-AUD-AB550' },
+    { name: 'Audionic Airbud 425 TWS Touch Earbuds', brand: 'Audionic', cost: 2900, price: 4200, sku: 'AUD-AUD-AB425' },
+    { name: 'Audionic Sugar 20 Wireless Portable Speaker', brand: 'Audionic', cost: 2200, price: 3100, sku: 'AUD-AUD-SUG20' },
+    { name: 'Faster TG-300 TWS Gaming Wireless Earbuds', brand: 'Faster', cost: 2600, price: 3800, sku: 'AUD-FAS-TG300' },
     { name: 'M10 TWS Wireless Earbuds with Power Bank LED Display', brand: 'Generic', cost: 850, price: 1450, sku: 'AUD-GEN-M10' },
+    { name: 'M90 Pro Wireless Gaming Earbuds Low Latency', brand: 'Generic', cost: 1100, price: 1750, sku: 'AUD-GEN-M90P' },
   ];
 
   audioModels.forEach((a, idx) => {
@@ -258,14 +221,18 @@ async function main() {
     });
   });
 
-  // E. Power Banks (50 Items)
+  // ─── E. POWER BANKS & BATTERY PACKS (50 Items) ───
   const pbModels = [
     { name: 'Anker 737 Power Bank (PowerCore 24K 140W)', brand: 'Anker', cost: 28000, price: 35000, sku: 'PB-ANK-737-24K' },
-    { name: 'Anker 325 Power Bank 20000mAh 15W', brand: 'Anker', cost: 6800, price: 9200, sku: 'PB-ANK-325-20K' },
-    { name: 'Baseus Blade 100W 20000mAh Power Bank', brand: 'Baseus', cost: 14500, price: 18500, sku: 'PB-BAS-BLADE-100W' },
+    { name: 'Anker 325 Power Bank (PowerCore 20000mAh 15W)', brand: 'Anker', cost: 6800, price: 9200, sku: 'PB-ANK-325-20K' },
+    { name: 'Anker 622 Magnetic Battery (MagGo 5000mAh Wireless)', brand: 'Anker', cost: 11500, price: 14900, sku: 'PB-ANK-622-MAG' },
+    { name: 'Baseus Blade 100W Ultra-Thin 20000mAh Power Bank', brand: 'Baseus', cost: 14500, price: 18500, sku: 'PB-BAS-BLADE-100W' },
+    { name: 'Baseus Adaman 22.5W 20000mAh Metal Digital Power Bank', brand: 'Baseus', cost: 5600, price: 7500, sku: 'PB-BAS-ADM-20K' },
     { name: 'Xiaomi 20000mAh 50W Fast Charge Power Bank', brand: 'Xiaomi', cost: 7200, price: 9500, sku: 'PB-MI-20K-50W' },
-    { name: 'Ronin R-95 20000mAh 22.5W Power Bank', brand: 'Ronin', cost: 3600, price: 4999, sku: 'PB-RON-R95-20K' },
-    { name: 'Faster PB-200 20000mAh Digital Power Bank', brand: 'Faster', cost: 3400, price: 4700, sku: 'PB-FAS-PB200' },
+    { name: 'Xiaomi 10000mAh 22.5W Pocket Edition Power Bank', brand: 'Xiaomi', cost: 3800, price: 5200, sku: 'PB-MI-10K-22W' },
+    { name: 'Ronin R-95 20000mAh 22.5W Super Fast Power Bank', brand: 'Ronin', cost: 3600, price: 4999, sku: 'PB-RON-R95-20K' },
+    { name: 'Ronin R-85 10000mAh PD Fast Power Bank', brand: 'Ronin', cost: 2400, price: 3450, sku: 'PB-RON-R85-10K' },
+    { name: 'Faster PB-200 20000mAh 22.5W Digital Power Bank', brand: 'Faster', cost: 3400, price: 4700, sku: 'PB-FAS-PB200' },
   ];
 
   pbModels.forEach((p, idx) => {
@@ -285,7 +252,7 @@ async function main() {
     });
   });
 
-  // F. Cases & Covers & Protectors (100 Items)
+  // ─── F. CASES, COVERS & TEMPERED GLASS (100 Items) ───
   const modelsForCases = [
     'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15', 'iPhone 14 Pro Max', 'iPhone 14',
     'iPhone 13', 'iPhone 12', 'iPhone 11', 'Samsung S24 Ultra', 'Samsung S24 Plus',
@@ -294,6 +261,7 @@ async function main() {
   ];
 
   modelsForCases.forEach((m, idx) => {
+    // 1. MagSafe Clear Shockproof Case
     products.push({
       nameEn: `${m} Clear MagSafe Shockproof Case`,
       nameUr: `${m} کلیر میگ سیف شاک پروف کور`,
@@ -309,6 +277,7 @@ async function main() {
       isActive: true,
     });
 
+    // 2. Liquid Silicone Soft Case
     products.push({
       nameEn: `${m} Premium Liquid Silicone Soft Case`,
       nameUr: `${m} پریمیم لیکوڈ سلیکون نرم کور`,
@@ -324,6 +293,7 @@ async function main() {
       isActive: true,
     });
 
+    // 3. 11D Super HD Tempered Glass Protector
     products.push({
       nameEn: `${m} 11D Full Glue HD Tempered Glass`,
       nameUr: `${m} 11D ایچ ڈی گلاس پروٹیکٹر`,
@@ -339,6 +309,7 @@ async function main() {
       isActive: true,
     });
 
+    // 4. Privacy Anti-Peep Tempered Glass Protector
     products.push({
       nameEn: `${m} Privacy Anti-Spy Black Tempered Glass`,
       nameUr: `${m} پرائیویسی بلیک گلاس پروٹیکٹر`,
@@ -355,20 +326,20 @@ async function main() {
     });
   });
 
-  // G. Repair Tools & Spare Parts (50 Items)
+  // ─── G. MOBILE REPAIR TOOLS & SPARE PARTS (50 Items) ───
   const repairTools = [
     { name: 'MECHANIC T-7000 Black Waterproof Display Frame Glue (50ml)', cost: 250, price: 450, sku: 'REP-GLU-T7000' },
     { name: 'MECHANIC B-7000 Transparent Screen Adhesive Glue (50ml)', cost: 240, price: 420, sku: 'REP-GLU-B7000' },
     { name: 'RELIFE RL-004M Anti-Static Heat Resistant Silicone Repair Pad', cost: 1800, price: 2600, sku: 'REP-MAT-RL004' },
-    { name: 'Sunshine SS-890C Hydrogel Screen Protector Cutting Film (50pcs)', cost: 6500, price: 9000, sku: 'REP-FLM-SUN50' },
+    { name: 'Sunshine SS-890C Hydrogel Screen Protector Cutting Machine Film (50pcs)', cost: 6500, price: 9000, sku: 'REP-FLM-SUN50' },
     { name: 'JAKEMY JM-8172 73-in-1 Precision Magnetic Screwdriver Set', cost: 2800, price: 3900, sku: 'REP-TL-JAK73' },
     { name: 'Kaisi Display Opening Strong Vacuum Suction Cup Plier', cost: 650, price: 1100, sku: 'REP-TL-SUCT' },
     { name: 'Sunshine T12A Soldering Iron Station Heating Core Kit', cost: 4800, price: 6500, sku: 'REP-SLD-T12A' },
     { name: 'RELIFE UV Curing Optical Lamp (Fast Adhesive Cure)', cost: 1200, price: 1800, sku: 'REP-UV-LAMP' },
     { name: 'iPhone 13 Original Capacity Replacement Battery 3227mAh', cost: 3400, price: 5500, sku: 'REP-BAT-IP13' },
-    { name: 'iPhone 12 Replacement Battery with BMS Flex', cost: 2900, price: 4800, sku: 'REP-BAT-IP12' },
-    { name: 'Samsung Galaxy A15 / A14 Charging Port PCB Flex', cost: 350, price: 850, sku: 'REP-FLX-A15' },
-    { name: 'Redmi Note 13 OLED Display Panel Screen Assembly', cost: 4800, price: 7500, sku: 'REP-DSP-RN13' },
+    { name: 'iPhone 12 / 12 Pro Replacement Battery with BMS Flex', cost: 2900, price: 4800, sku: 'REP-BAT-IP12' },
+    { name: 'Samsung Galaxy A15 / A14 Charging Port PCB Board Flex', cost: 350, price: 850, sku: 'REP-FLX-A15' },
+    { name: 'Redmi Note 12 / Note 13 OLED Display Panel Screen Assembly', cost: 4800, price: 7500, sku: 'REP-DSP-RN13' },
   ];
 
   repairTools.forEach((r, idx) => {
@@ -388,7 +359,9 @@ async function main() {
     });
   });
 
+  // 4. Insert all products using upsert to avoid duplicates
   console.log(`📦 Upserting ${products.length} products into database catalog...`);
+  let count = 0;
   for (const p of products) {
     await prisma.product.upsert({
       where: { sku: p.sku },
@@ -400,19 +373,15 @@ async function main() {
       },
       create: p,
     });
+    count++;
   }
 
-  console.log('\n🎉 Database seeding complete with 500+ Mobile Shop Products!');
-  console.log('─────────────────────────────────────');
-  console.log('Super Admin Credentials:');
-  console.log('  Username: Hassan@009');
-  console.log('  Password: shopco@123');
-  console.log('─────────────────────────────────────');
+  console.log(`✅ Successfully seeded ${count} high-demand Mobile Shop products and accessories!`);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed error:', e);
+    console.error('❌ Error seeding products:', e);
     process.exit(1);
   })
   .finally(async () => {

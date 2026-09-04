@@ -25,12 +25,34 @@ const createUserSchema = z.object({
 // GET /users
 router.get('/', managerOrAdmin, asyncHandler(async (req, res) => {
   const { skip, take, page, limit } = getPaginationParams(req.query);
-  const where = req.query.search
-    ? { OR: [{ username: { contains: req.query.search, mode: 'insensitive' } }, { fullName: { contains: req.query.search, mode: 'insensitive' } }] }
-    : {};
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009' || currentUser?.role === 'SUPERADMIN';
+
+  let where = {};
+  if (req.query.search) {
+    where.OR = [
+      { username: { contains: req.query.search, mode: 'insensitive' } },
+      { fullName: { contains: req.query.search, mode: 'insensitive' } }
+    ];
+  }
+
+  if (!isSuperAdmin) {
+    // Hide Super Admin and demo accounts from shop owners
+    where = {
+      ...where,
+      id: req.user.userId, // Shop owner only sees their own account & staff
+      username: { notIn: ['Hassan@009', 'admin', 'manager', 'cashier'] }
+    };
+  }
 
   const [users, total] = await Promise.all([
-    prisma.user.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, select: { id: true, username: true, fullName: true, email: true, phone: true, role: true, status: true, createdAt: true } }),
+    prisma.user.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, username: true, fullName: true, email: true, phone: true, role: true, status: true, createdAt: true }
+    }),
     prisma.user.count({ where }),
   ]);
   return apiRes.paginated(res, users, buildPaginationMeta(total, page, limit));
@@ -40,22 +62,46 @@ router.get('/', managerOrAdmin, asyncHandler(async (req, res) => {
 router.post('/', adminOnly, validate(createUserSchema), asyncHandler(async (req, res) => {
   const { password, ...data } = req.validatedBody;
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({ data: { ...data, passwordHash }, select: { id: true, username: true, fullName: true, role: true, status: true } });
+  const user = await prisma.user.create({
+    data: { ...data, passwordHash },
+    select: { id: true, username: true, fullName: true, role: true, status: true }
+  });
   return apiRes.created(res, user, 'User created successfully');
 }));
 
 // PUT /users/:id
 router.put('/:id', adminOnly, asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
+  const targetUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (targetUser?.username === 'Hassan@009' && !isSuperAdmin) {
+    return apiRes.forbidden(res, 'You do not have permission to modify the Super Admin account');
+  }
+
   const { password, ...data } = req.body;
   const updateData = { ...data };
   if (password) updateData.passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.update({ where: { id: req.params.id }, data: updateData, select: { id: true, username: true, fullName: true, role: true, status: true } });
+  const user = await prisma.user.update({
+    where: { id: req.params.id },
+    data: updateData,
+    select: { id: true, username: true, fullName: true, role: true, status: true }
+  });
   return apiRes.success(res, user, 'User updated');
 }));
 
 // DELETE /users/:id (soft deactivate)
 router.delete('/:id', adminOnly, asyncHandler(async (req, res) => {
   if (req.params.id === req.user.userId) return apiRes.badRequest(res, 'Cannot deactivate your own account');
+
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
+  const targetUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (targetUser?.username === 'Hassan@009' && !isSuperAdmin) {
+    return apiRes.forbidden(res, 'You do not have permission to modify the Super Admin account');
+  }
+
   await prisma.user.update({ where: { id: req.params.id }, data: { status: 'INACTIVE' } });
   return apiRes.success(res, null, 'User deactivated');
 }));

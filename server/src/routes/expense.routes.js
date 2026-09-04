@@ -9,9 +9,15 @@ router.use(authMiddleware);
 
 // GET /expenses — List all expenses with summary totals
 router.get('/', asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
   const { category, from, to } = req.query;
   const where = {};
   if (category) where.category = category;
+  if (!isSuperAdmin) {
+    where.userId = req.user.userId;
+  }
   if (from || to) {
     where.expenseDate = {};
     if (from) where.expenseDate.gte = new Date(from);

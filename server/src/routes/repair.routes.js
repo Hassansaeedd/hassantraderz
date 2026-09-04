@@ -9,9 +9,15 @@ router.use(authMiddleware);
 
 // GET /repairs — List all repair tickets with optional status filtering
 router.get('/', asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
   const { status, search } = req.query;
   const where = {};
   if (status) where.status = status;
+  if (!isSuperAdmin) {
+    where.userId = req.user.userId;
+  }
   if (search) {
     where.OR = [
       { ticketNo: { contains: search } },

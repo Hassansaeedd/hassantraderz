@@ -9,8 +9,14 @@ router.use(authMiddleware);
 
 // GET /trade-ins — List all trade-ins
 router.get('/', asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
   const { search } = req.query;
   const where = {};
+  if (!isSuperAdmin) {
+    where.userId = req.user.userId;
+  }
   if (search) {
     where.OR = [
       { voucherNo: { contains: search } },

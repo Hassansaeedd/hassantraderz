@@ -15,12 +15,19 @@ router.use(authMiddleware);
 
 // GET /sales
 router.get('/', asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const { status, customerId, userId, from, to } = req.query;
   const where = {};
   if (status) where.status = status;
   if (customerId) where.customerId = customerId;
-  if (userId) where.userId = userId;
+  if (isSuperAdmin) {
+    if (userId) where.userId = userId;
+  } else {
+    where.userId = req.user.userId;
+  }
   if (from || to) {
     where.saleDate = {};
     if (from) where.saleDate.gte = new Date(from);

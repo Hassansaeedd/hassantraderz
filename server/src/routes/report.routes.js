@@ -11,16 +11,40 @@ router.use(authMiddleware, managerOrAdmin);
 
 // GET /reports/dashboard
 router.get('/dashboard', asyncHandler(async (req, res) => {
+  const currentUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  const isSuperAdmin = currentUser?.username === 'Hassan@009';
+
   const todayStart = dayjs().startOf('day').toDate();
   const todayEnd   = dayjs().endOf('day').toDate();
   const monthStart = dayjs().startOf('month').toDate();
 
+  const userFilter = isSuperAdmin ? {} : { userId: req.user.userId };
+
   const [todaySales, monthSales, lowStock, topProducts, recentSales] = await Promise.all([
-    prisma.sale.aggregate({ where: { status: 'COMPLETED', saleDate: { gte: todayStart, lte: todayEnd } }, _sum: { totalAmount: true, gstAmount: true }, _count: true }),
-    prisma.sale.aggregate({ where: { status: 'COMPLETED', saleDate: { gte: monthStart } }, _sum: { totalAmount: true }, _count: true }),
+    prisma.sale.aggregate({
+      where: { ...userFilter, status: 'COMPLETED', saleDate: { gte: todayStart, lte: todayEnd } },
+      _sum: { totalAmount: true, gstAmount: true },
+      _count: true
+    }),
+    prisma.sale.aggregate({
+      where: { ...userFilter, status: 'COMPLETED', saleDate: { gte: monthStart } },
+      _sum: { totalAmount: true },
+      _count: true
+    }),
     prisma.$queryRaw`SELECT id, "nameEn", "nameUr", "currentStock", "minStockLevel" FROM products WHERE "isActive" = true AND "currentStock" <= "minStockLevel" ORDER BY "currentStock" ASC LIMIT 10`,
-    prisma.saleItem.groupBy({ by: ['productId'], where: { sale: { saleDate: { gte: monthStart }, status: 'COMPLETED' } }, _sum: { quantity: true, totalAmount: true }, orderBy: { _sum: { totalAmount: 'desc' } }, take: 5 }),
-    prisma.sale.findMany({ take: 5, orderBy: { saleDate: 'desc' }, include: { customer: { select: { name: true } }, user: { select: { fullName: true } } } }),
+    prisma.saleItem.groupBy({
+      by: ['productId'],
+      where: { sale: { ...userFilter, saleDate: { gte: monthStart }, status: 'COMPLETED' } },
+      _sum: { quantity: true, totalAmount: true },
+      orderBy: { _sum: { totalAmount: 'desc' } },
+      take: 5
+    }),
+    prisma.sale.findMany({
+      where: userFilter,
+      take: 5,
+      orderBy: { saleDate: 'desc' },
+      include: { customer: { select: { name: true } }, user: { select: { fullName: true } } }
+    }),
   ]);
 
   // Fetch product names for top products
@@ -30,11 +54,17 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
 
   // Revenue chart: last 30 days
   const thirtyDaysAgo = dayjs().subtract(29, 'day').startOf('day').toDate();
-  const dailySales = await prisma.$queryRaw`
-    SELECT DATE("saleDate") as date, SUM("totalAmount") as revenue, SUM("gstAmount") as gst
-    FROM sales WHERE status = 'COMPLETED' AND "saleDate" >= ${thirtyDaysAgo}
-    GROUP BY DATE("saleDate") ORDER BY date ASC
-  `;
+  const dailySales = isSuperAdmin
+    ? await prisma.$queryRaw`
+        SELECT DATE("saleDate") as date, SUM("totalAmount") as revenue, SUM("gstAmount") as gst
+        FROM sales WHERE status = 'COMPLETED' AND "saleDate" >= ${thirtyDaysAgo}
+        GROUP BY DATE("saleDate") ORDER BY date ASC
+      `
+    : await prisma.$queryRaw`
+        SELECT DATE("saleDate") as date, SUM("totalAmount") as revenue, SUM("gstAmount") as gst
+        FROM sales WHERE "userId" = ${req.user.userId} AND status = 'COMPLETED' AND "saleDate" >= ${thirtyDaysAgo}
+        GROUP BY DATE("saleDate") ORDER BY date ASC
+      `;
 
   return apiRes.success(res, {
     today:        { revenue: Number(todaySales._sum.totalAmount || 0), transactions: todaySales._count, gst: Number(todaySales._sum.gstAmount || 0) },
