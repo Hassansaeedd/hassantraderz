@@ -190,7 +190,7 @@ export default function RepairsPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={4} style={{ margin: 0, fontWeight: 800 }}>
             Mobile Repair Work Orders (موبائل ریپئرنگ ورک آرڈر)
@@ -212,7 +212,7 @@ export default function RepairsPage() {
       </div>
 
       <Card style={{ marginBottom: 16 }}>
-        <Row gutter={12}>
+        <Row gutter={[10, 10]}>
           <Col xs={24} md={12}>
             <Input
               prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
@@ -256,6 +256,7 @@ export default function RepairsPage() {
           dataSource={repairs}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

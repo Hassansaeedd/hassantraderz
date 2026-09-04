@@ -1,4 +1,4 @@
-// client/src/components/layout/AppLayout.jsx — Fluid Responsive Header Bar & Drawer Navigation
+// client/src/components/layout/AppLayout.jsx — Zero-Gap Responsive Layout (PC & Mobile Browser)
 import { useState, useEffect } from 'react';
 import { Layout, Button, Dropdown, Space, Avatar, Drawer } from 'antd';
 import {
@@ -27,7 +27,7 @@ export default function AppLayout() {
   const [licenseOpen, setLicenseOpen]     = useState(false);
   const [isMobile, setIsMobile]           = useState(window.innerWidth <= 992);
 
-  // Monitor window resize for responsive layout
+  // Monitor window resize dynamically
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 992;
@@ -87,13 +87,13 @@ export default function AppLayout() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)', width: '100%', overflowX: 'hidden' }}>
-      {/* Desktop Sidebar (Rendered on >= 992px) */}
-      <div className="desktop-sidebar">
+    <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)', width: '100%' }}>
+      {/* Desktop Persistent Sidebar (Only in DOM when screen > 992px) */}
+      {!isMobile && (
         <Sidebar collapsed={collapsed} />
-      </div>
+      )}
 
-      {/* Mobile / Tablet Drawer Sidebar (< 992px) */}
+      {/* Mobile / Tablet Drawer Sidebar (<= 992px) */}
       <Drawer
         placement="left"
         onClose={() => setMobileVisible(false)}
@@ -105,14 +105,15 @@ export default function AppLayout() {
         <Sidebar collapsed={false} onNavClick={() => setMobileVisible(false)} />
       </Drawer>
 
-      {/* Main Workspace Layout */}
+      {/* Main Workspace Layout (Naturally flexes with 0 gap) */}
       <Layout
         className="main-layout-container"
         style={{
-          marginInlineStart: isMobile ? 0 : (collapsed ? 80 : 240),
-          transition: 'margin-inline-start 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           background: 'transparent',
           minWidth: 0,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {/* Responsive Header Bar */}
@@ -130,9 +131,10 @@ export default function AppLayout() {
             top: 0,
             zIndex: 100,
             height: 60,
+            padding: isMobile ? '0 12px' : '0 24px',
           }}
         >
-          {/* Left: Navigation Toggle Button & Brand title on mobile */}
+          {/* Left: Navigation Toggle Button & Brand title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Button
               type="text"
@@ -150,7 +152,7 @@ export default function AppLayout() {
 
           {/* Right: Quick Actions & Profile */}
           <Space size={isMobile ? 6 : 'middle'}>
-            {/* License Status Button */}
+            {/* License Status Button (Desktop Only) */}
             {!isMobile && (
               <Button
                 icon={<KeyOutlined style={{ color: 'var(--primary)' }} />}
@@ -212,7 +214,7 @@ export default function AppLayout() {
         </Header>
 
         {/* Responsive Workspace Content Viewport */}
-        <Content className="app-content-viewport" style={{ minHeight: 280 }}>
+        <Content className="app-content-viewport" style={{ minHeight: 280, padding: isMobile ? 12 : 24, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
           <Outlet />
         </Content>
       </Layout>

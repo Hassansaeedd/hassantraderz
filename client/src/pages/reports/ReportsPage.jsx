@@ -110,6 +110,7 @@ export default function ReportsPage() {
                   columns={salesColumns}
                   rowKey="id"
                   loading={loading}
+                  scroll={{ x: 'max-content' }}
                   style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 8 }}
                 />
               </div>
@@ -138,6 +139,7 @@ export default function ReportsPage() {
                   columns={inventoryColumns}
                   rowKey="id"
                   loading={loading}
+                  scroll={{ x: 'max-content' }}
                   style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 8 }}
                 />
               </div>

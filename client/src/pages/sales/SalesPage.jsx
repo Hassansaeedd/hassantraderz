@@ -219,6 +219,7 @@ export default function SalesPage() {
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           ...pagination,
           onChange: (page, pageSize) => fetchSales(page, pageSize),

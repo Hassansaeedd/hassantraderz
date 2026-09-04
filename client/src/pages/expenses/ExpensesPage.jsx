@@ -148,7 +148,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={4} style={{ margin: 0, fontWeight: 800 }}>
             Shop Expenses & Net Profit (دکان کے اخراجات اور منافع)
@@ -170,7 +170,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* KPI Cards */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={24} md={8}>
           <div className="kpi-card danger">
             <Statistic
@@ -206,7 +206,7 @@ export default function ExpensesPage() {
       </Row>
 
       <Card style={{ marginBottom: 16 }}>
-        <Row gutter={12}>
+        <Row gutter={[10, 10]}>
           <Col xs={16} md={18}>
             <Select
               placeholder="Filter by Category"
@@ -240,6 +240,7 @@ export default function ExpensesPage() {
           dataSource={expenses}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

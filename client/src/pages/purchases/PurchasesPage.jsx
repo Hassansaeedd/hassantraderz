@@ -183,8 +183,7 @@ export default function PurchasesPage() {
 
   return (
     <div className="fade-in">
-      {/* OriginKit Tech Header Toolbar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={3} style={{ color: 'var(--text)', margin: 0, fontWeight: 800 }}>
             <InboxOutlined style={{ color: 'var(--primary)', marginRight: 10 }} />
@@ -195,7 +194,7 @@ export default function PurchasesPage() {
           </Text>
         </div>
 
-        <Space>
+        <Space wrap>
           <Button icon={<ReloadOutlined />} onClick={() => fetchPurchases(pagination.current, pagination.pageSize)} />
           <Button
             type="primary"
@@ -209,24 +208,24 @@ export default function PurchasesPage() {
         </Space>
       </div>
 
-      {/* KPI Cards — Fixed Light Mode Color Contrast */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      {/* KPI Cards — Responsive Grid */}
+      <Row gutter={[12, 12]} style={{ marginBottom: 20 }}>
         <Col xs={24} sm={12} md={8}>
           <div className="kpi-card">
             <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>Total Purchase Orders</div>
-            <div style={{ color: 'var(--text)', fontSize: 28, fontWeight: 800, marginTop: 6 }}>{pagination.total || purchases.length}</div>
+            <div style={{ color: 'var(--text)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>{pagination.total || purchases.length}</div>
           </div>
         </Col>
         <Col xs={24} sm={12} md={8}>
           <div className="kpi-card success">
             <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>Total Orders Value</div>
-            <div style={{ color: 'var(--success)', fontSize: 28, fontWeight: 800, marginTop: 6 }}>{formatCurrency(totalPOValue)}</div>
+            <div style={{ color: 'var(--success)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>{formatCurrency(totalPOValue)}</div>
           </div>
         </Col>
         <Col xs={24} sm={12} md={8}>
           <div className="kpi-card warning">
             <div style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>Pending Stock Receipt</div>
-            <div style={{ color: 'var(--warning)', fontSize: 28, fontWeight: 800, marginTop: 6 }}>{pendingCount} Orders</div>
+            <div style={{ color: 'var(--warning)', fontSize: 24, fontWeight: 800, marginTop: 4 }}>{pendingCount} Orders</div>
           </div>
         </Col>
       </Row>
@@ -238,6 +237,7 @@ export default function PurchasesPage() {
           columns={columns}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ ...pagination, onChange: (page, limit) => fetchPurchases(page, limit) }}
         />
       </Card>

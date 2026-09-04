@@ -80,9 +80,9 @@ export default function UsersPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Title level={3} style={{ color: 'var(--text)', margin: 0 }}>{t('nav.users')}</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <Title level={3} style={{ color: 'var(--text)', margin: 0, fontWeight: 800 }}>{t('nav.users')}</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd} style={{ fontWeight: 700 }}>
           Add User Account
         </Button>
       </div>
@@ -92,6 +92,7 @@ export default function UsersPage() {
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 8 }}
       />
 

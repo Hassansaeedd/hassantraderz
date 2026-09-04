@@ -91,7 +91,7 @@ export default function CustomersPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={3} style={{ color: 'var(--text)', margin: 0, fontWeight: 800 }}>
             <TeamOutlined style={{ color: 'var(--primary)', marginRight: 10 }} />
@@ -101,7 +101,7 @@ export default function CustomersPage() {
             Customer directory, contact numbers, and outstanding balance tracking
           </Text>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd} style={{ fontWeight: 700 }}>
           {t('customers.add')}
         </Button>
       </div>
@@ -112,7 +112,7 @@ export default function CustomersPage() {
           placeholder="Search customer by name or phone..."
           value={search}
           onChange={e => { setSearch(e.target.value); fetchCustomers(e.target.value); }}
-          style={{ maxWidth: 400 }}
+          style={{ maxWidth: 400, width: '100%' }}
           allowClear
         />
       </Card>
@@ -122,6 +122,7 @@ export default function CustomersPage() {
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 8 }}
       />
 

@@ -81,9 +81,9 @@ export default function SuppliersPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Title level={3} style={{ color: 'var(--text)', margin: 0 }}>{t('suppliers.title')}</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <Title level={3} style={{ color: 'var(--text)', margin: 0, fontWeight: 800 }}>{t('suppliers.title')}</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenAdd} style={{ fontWeight: 700 }}>
           {t('suppliers.add')}
         </Button>
       </div>
@@ -94,7 +94,7 @@ export default function SuppliersPage() {
           placeholder="Search supplier by name or company..."
           value={search}
           onChange={e => { setSearch(e.target.value); fetchSuppliers(e.target.value); }}
-          style={{ maxWidth: 400 }}
+          style={{ maxWidth: 400, width: '100%' }}
           allowClear
         />
       </Card>
@@ -104,6 +104,7 @@ export default function SuppliersPage() {
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 8 }}
       />
 

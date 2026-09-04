@@ -191,7 +191,7 @@ export default function TradeInPage() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div className="page-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={4} style={{ margin: 0, fontWeight: 800 }}>
             Used Mobile Buyback & Police Verification (استعمال شدہ موبائل خرید و فروخت)
@@ -213,7 +213,7 @@ export default function TradeInPage() {
       </div>
 
       <Card style={{ marginBottom: 16 }}>
-        <Row gutter={12}>
+        <Row gutter={[10, 10]}>
           <Col xs={24} md={16}>
             <Input
               prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
@@ -240,6 +240,7 @@ export default function TradeInPage() {
           dataSource={tradeIns}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

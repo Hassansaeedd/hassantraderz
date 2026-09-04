@@ -1,4 +1,4 @@
-// client/src/components/layout/Sidebar.jsx — Sleek Minimal Glassmorphic Sidebar
+// client/src/components/layout/Sidebar.jsx — Sleek Minimal Glassmorphic Sticky Sidebar
 import { Layout } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -52,12 +52,15 @@ export default function Sidebar({ collapsed, onNavClick }) {
     <Sider
       collapsed={collapsed}
       width={240}
+      collapsedWidth={80}
       className="glass-sidebar"
       style={{
-        height: '100%',
-        minHeight: '100vh',
-        overflow: 'auto',
-        zIndex: 200,
+        height: '100vh',
+        position: 'sticky',
+        top: 0,
+        overflowY: 'auto',
+        zIndex: 100,
+        flexShrink: 0,
       }}
     >
       {/* Brand Emblem / Official Logo */}
