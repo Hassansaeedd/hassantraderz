@@ -347,57 +347,51 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* RIGHT PANEL: Professional Overview (Desktop Only) */}
+        {/* RIGHT PANEL: Modern Mobile Shop & Accessories Showcase Image */}
         {!isMobile && (
           <div style={{
-            flex: 0.9,
-            background: isDark
-              ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)'
-              : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-            padding: '36px 30px',
+            flex: 0.95,
+            position: 'relative',
+            overflow: 'hidden',
+            minHeight: 520,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
-            borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
+            justifyContent: 'flex-end',
+            padding: 24,
+            backgroundImage: 'url(/login_showcase.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
           }}>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
-                Retail & Repair POS
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: '0 0 10px', lineHeight: 1.3 }}>
-                Professional Mobile Shop Management
-              </h3>
-              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
-                High-speed POS billing, real-time inventory, customer Khata ledger, and repair job tickets.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {[
-                  { title: 'Barcode POS & Thermal Receipts', desc: 'Fast counter billing and 80mm thermal receipt printing' },
-                  { title: 'Customer Khata (Ledger)', desc: 'Automatic debit/credit accounts and printable statements' },
-                  { title: 'Mobile Repair Work Orders', desc: 'Diagnostic tracking and customer claim receipts' },
-                  { title: 'License & Multi-Shop Manager', desc: 'Manage subscriptions, durations, and access control' },
-                ].map((feat, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <CheckCircleOutlined style={{ color: '#10b981', marginTop: 3 }} />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 12.5, color: isDark ? '#f8fafc' : '#1e293b' }}>{feat.title}</div>
-                      <div style={{ fontSize: 11, color: isDark ? '#94a3b8' : '#64748b' }}>{feat.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            {/* Subtle Gradient Shade for Contrast */}
             <div style={{
-              background: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)',
-              padding: '12px 14px',
-              borderRadius: 10,
-              fontSize: 11.5,
-              color: isDark ? '#94a3b8' : '#475569',
+              position: 'absolute',
+              inset: 0,
+              background: isDark
+                ? 'linear-gradient(180deg, rgba(9, 13, 22, 0.15) 0%, rgba(9, 13, 22, 0.75) 100%)'
+                : 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(15, 23, 42, 0.75) 100%)',
+              pointerEvents: 'none',
+            }} />
+
+            {/* Sleek Bottom Glass Overlay Tag */}
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: 12,
+              padding: '14px 18px',
+              color: '#ffffff',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
             }}>
-              <SafetyCertificateOutlined style={{ color: '#2563eb', marginRight: 6 }} />
-              Enterprise Data Security & Cloud Sync
+              <div style={{ fontWeight: 800, fontSize: 14, letterSpacing: -0.2, marginBottom: 2 }}>
+                Mobile Phones, Accessories & Repair POS
+              </div>
+              <div style={{ fontSize: 11.5, color: '#cbd5e1', opacity: 0.9 }}>
+                Hassan Traderz Enterprise Retail Software
+              </div>
             </div>
           </div>
         )}
