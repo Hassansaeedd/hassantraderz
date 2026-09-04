@@ -7,7 +7,8 @@ import {
   DashboardOutlined, ShoppingCartOutlined, AppstoreOutlined,
   ShoppingOutlined, TeamOutlined, TruckOutlined,
   BarChartOutlined, SettingOutlined, UserOutlined,
-  InboxOutlined, ToolOutlined, SwapOutlined, BookOutlined, AuditOutlined
+  InboxOutlined, ToolOutlined, SwapOutlined, BookOutlined, AuditOutlined,
+  KeyOutlined
 } from '@ant-design/icons';
 
 const { Sider } = Layout;

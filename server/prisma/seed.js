@@ -7,21 +7,21 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // ── Admin User ─────────────────────────────────────────────────────────────
-  const adminPassword = await bcrypt.hash('Admin@123', 12);
+  // ── Super Admin User (Hassan@009 / shopco@123) ────────────────────────────
+  const adminPassword = await bcrypt.hash('shopco@123', 12);
   const admin = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
+    where: { username: 'Hassan@009' },
+    update: { passwordHash: adminPassword, role: 'ADMIN', status: 'ACTIVE' },
     create: {
-      username: 'admin',
-      email: 'admin@mobileshop.pk',
+      username: 'Hassan@009',
+      email: 'admin@hassantraderz.com',
       passwordHash: adminPassword,
-      fullName: 'System Administrator',
+      fullName: 'Hassan Saeed (Super Admin)',
       role: 'ADMIN',
       status: 'ACTIVE',
     },
   });
-  console.log('✅ Admin user created:', admin.username);
+  console.log('✅ Super Admin user ready: Hassan@009');
 
   // ── Demo Manager ────────────────────────────────────────────────────────────
   const managerPassword = await bcrypt.hash('Manager@123', 12);

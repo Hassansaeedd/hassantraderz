@@ -1,17 +1,18 @@
-// client/src/pages/auth/LoginPage.jsx — Unified Login & Shop Self-Registration Portal
+// client/src/pages/auth/LoginPage.jsx — Professional Minimalist Glassmorphic Login & Shop Registration Portal
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Segmented, Row, Col, Alert, Tag } from 'antd';
+import { Form, Input, Button, message, Segmented, Row, Col, Typography } from 'antd';
 import {
   UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone,
   SunOutlined, MoonOutlined, ShopOutlined, PhoneOutlined,
-  KeyOutlined, CheckCircleOutlined, SafetyCertificateOutlined,
-  ThunderboltOutlined
+  CheckCircleOutlined, SafetyCertificateOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import api from '../../api/axiosInstance';
+
+const { Title, Text } = Typography;
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -33,7 +34,7 @@ export default function LoginPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Handle Login (Admin, Manager, or Shop Cashier)
+  // Handle Login
   const handleLogin = async (values) => {
     setLoading(true);
     try {
@@ -41,7 +42,7 @@ export default function LoginPage() {
       const user = res.data.user;
       const token = res.data.accessToken;
       setAuth(user, token);
-      message.success(`Welcome back, ${user.fullName || user.username}!`);
+      message.success(`Welcome, ${user.fullName || user.username}`);
       
       if (user.role === 'ADMIN') {
         navigate('/dashboard');
@@ -76,7 +77,7 @@ export default function LoginPage() {
             shopName: lic.shopName,
           }));
         }
-        message.success(`🎉 Welcome to Hassan Traderz! Your 15-Day Free Trial is active!`);
+        message.success(`Shop account registered. Your 15-day trial is active.`);
         navigate('/dashboard');
       }
     } catch (err) {
@@ -84,15 +85,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Quick 1-Click Super Admin Fill
-  const handleQuickFillAdmin = () => {
-    loginForm.setFieldsValue({
-      username: 'admin',
-      password: 'Admin@123',
-    });
-    message.info('Filled Super Admin credentials (admin / Admin@123)');
   };
 
   const switchLang = (lang) => i18n.changeLanguage(lang);
@@ -115,14 +107,14 @@ export default function LoginPage() {
       {/* Background Ambient Glows */}
       <div style={{
         position: 'absolute', top: '-15%', left: '10%', width: 600, height: 600,
-        background: isDark ? 'radial-gradient(circle, rgba(37, 99, 235, 0.09) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 70%)',
+        background: isDark ? 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%)',
         filter: 'blur(60px)', pointerEvents: 'none',
       }} />
 
       {/* Main Container */}
       <div style={{
         width: '100%',
-        maxWidth: isMobile ? 440 : 960,
+        maxWidth: isMobile ? 440 : 920,
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         borderRadius: 20,
@@ -134,7 +126,7 @@ export default function LoginPage() {
         boxShadow: '0 25px 60px rgba(0, 0, 0, 0.25)',
         position: 'relative',
         zIndex: 1,
-        minHeight: isMobile ? 'auto' : 560,
+        minHeight: isMobile ? 'auto' : 520,
       }}>
 
         {/* LEFT PANEL: Form with Sign In & Register Tabs */}
@@ -187,8 +179,8 @@ export default function LoginPage() {
               value={activeTab}
               onChange={setActiveTab}
               options={[
-                { label: '🔑 Sign In / Admin Login', value: 'login' },
-                { label: '✨ Register Shop (15-Day Free Trial)', value: 'register' },
+                { label: 'Sign In', value: 'login' },
+                { label: 'Register Shop (15-Day Trial)', value: 'register' },
               ]}
               style={{
                 marginBottom: 20,
@@ -199,15 +191,15 @@ export default function LoginPage() {
               }}
             />
 
-            {/* ──────── TAB 1: SIGN IN (ADMIN & CASHIER) ──────── */}
+            {/* ──────── TAB 1: SIGN IN ──────── */}
             {activeTab === 'login' && (
               <div>
                 <div style={{ marginBottom: 16 }}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: 0 }}>
-                    Sign In to Portal
+                    Sign In
                   </h2>
                   <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12.5, margin: '2px 0 0' }}>
-                    Enter credentials to access POS counter or Super Admin Panel
+                    Enter your credentials to access your account
                   </p>
                 </div>
 
@@ -215,7 +207,8 @@ export default function LoginPage() {
                   <Form.Item name="username" rules={[{ required: true, message: 'Username is required' }]}>
                     <Input
                       prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
-                      placeholder="Username (e.g. admin or shop username)"
+                      placeholder="Username"
+                      autoComplete="username"
                       style={{ borderRadius: 10, height: 44 }}
                     />
                   </Form.Item>
@@ -224,7 +217,9 @@ export default function LoginPage() {
                     <Input.Password
                       prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
                       placeholder="Password"
+                      autoComplete="current-password"
                       style={{ borderRadius: 10, height: 44 }}
+                      iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined style={{ color: '#94a3b8' }} />}
                     />
                   </Form.Item>
 
@@ -247,56 +242,25 @@ export default function LoginPage() {
                     {loading ? 'Authenticating...' : 'Sign In'}
                   </Button>
                 </Form>
-
-                {/* Quick 1-Click Super Admin Fill Button */}
-                <div style={{
-                  marginTop: 16,
-                  padding: '10px 12px',
-                  background: isDark ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
-                  borderRadius: 10,
-                  border: isDark ? '1px dashed rgba(255, 255, 255, 0.15)' : '1px dashed #cbd5e1',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 12, color: isDark ? '#f8fafc' : '#0f172a' }}>
-                      👑 Master Admin Login
-                    </div>
-                    <div style={{ fontSize: 11, color: isDark ? '#94a3b8' : '#64748b' }}>
-                      User: <code>admin</code> | Pass: <code>Admin@123</code>
-                    </div>
-                  </div>
-                  <Button
-                    size="small"
-                    type="primary"
-                    ghost
-                    icon={<ThunderboltOutlined />}
-                    onClick={handleQuickFillAdmin}
-                    style={{ borderRadius: 6, fontWeight: 700 }}
-                  >
-                    1-Click Admin
-                  </Button>
-                </div>
               </div>
             )}
 
             {/* ──────── TAB 2: REGISTER NEW SHOP (15-DAY FREE TRIAL) ──────── */}
             {activeTab === 'register' && (
               <div>
-                <Alert
-                  type="info"
-                  showIcon
-                  icon={<CheckCircleOutlined style={{ color: '#2563eb' }} />}
-                  message="15-Day Free Trial Included"
-                  description="Register your mobile shop to test Barcodes, POS Billing, Repairs, and Khata."
-                  style={{ marginBottom: 16, borderRadius: 10 }}
-                />
+                <div style={{ marginBottom: 16 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: 0 }}>
+                    Create Shop Account
+                  </h2>
+                  <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12.5, margin: '2px 0 0' }}>
+                    15-day full access trial included automatically
+                  </p>
+                </div>
 
                 <Form form={registerForm} layout="vertical" onFinish={handleRegister} size="middle">
                   <Form.Item
                     name="shopName"
-                    label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Mobile Shop Name (دکان کا نام)</span>}
+                    label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Mobile Shop Name</span>}
                     rules={[{ required: true, message: 'Shop name is required' }]}
                     style={{ marginBottom: 12 }}
                   >
@@ -311,13 +275,13 @@ export default function LoginPage() {
                         rules={[{ required: true, message: 'Required' }]}
                         style={{ marginBottom: 12 }}
                       >
-                        <Input placeholder="e.g. Zubair Ahmad" />
+                        <Input placeholder="e.g. Muhammad Zubair" />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
                       <Form.Item
                         name="phone"
-                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>WhatsApp Phone</span>}
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Phone / WhatsApp</span>}
                         rules={[{ required: true, message: 'Required' }]}
                         style={{ marginBottom: 12 }}
                       >
@@ -330,21 +294,21 @@ export default function LoginPage() {
                     <Col span={12}>
                       <Form.Item
                         name="username"
-                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Login Username</span>}
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Username</span>}
                         rules={[{ required: true, message: 'Required', min: 3 }]}
                         style={{ marginBottom: 12 }}
                       >
-                        <Input placeholder="e.g. madinamobile" />
+                        <Input placeholder="Username" />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
                       <Form.Item
                         name="password"
-                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Login Password</span>}
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Password</span>}
                         rules={[{ required: true, message: 'Required', min: 6 }]}
                         style={{ marginBottom: 12 }}
                       >
-                        <Input.Password placeholder="Min 6 chars" />
+                        <Input.Password placeholder="Password" />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -360,12 +324,12 @@ export default function LoginPage() {
                       borderRadius: 10,
                       fontSize: 14,
                       fontWeight: 800,
-                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      background: '#2563eb',
                       borderColor: '#2563eb',
                       marginTop: 4,
                     }}
                   >
-                    {loading ? 'Creating Shop...' : 'Start 15-Day Free Trial'}
+                    {loading ? 'Creating Account...' : 'Register & Start Trial'}
                   </Button>
                 </Form>
               </div>
@@ -375,15 +339,15 @@ export default function LoginPage() {
           {/* Footer */}
           <div style={{ marginTop: 20, paddingTop: 12, borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: isDark ? '#64748b' : '#94a3b8' }}>
-              Hassan Traderz Commercial POS
+              Hassan Traderz Commercial Edition
             </span>
             <span style={{ fontSize: 11, color: '#10b981', fontWeight: 600 }}>
-              ● Cloud Online
+              Online
             </span>
           </div>
         </div>
 
-        {/* RIGHT PANEL: Tech Showcase Feature Grid (Desktop Only) */}
+        {/* RIGHT PANEL: Professional Overview (Desktop Only) */}
         {!isMobile && (
           <div style={{
             flex: 0.9,
@@ -397,22 +361,22 @@ export default function LoginPage() {
             borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
           }}>
             <div>
-              <Tag color="blue" style={{ fontWeight: 800, borderRadius: 6, marginBottom: 12 }}>
-                MULTI-SHOP POS & REPAIRS
-              </Tag>
+              <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                Retail & Repair POS
+              </div>
               <h3 style={{ fontSize: 20, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: '0 0 10px', lineHeight: 1.3 }}>
-                Everything your Mobile Shop needs in one place
+                Professional Mobile Shop Management
               </h3>
               <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
-                Manage smartphones, bulk CSV stock, barcode scanning, customer Khata ledgers, and technician repair work orders.
+                High-speed POS billing, real-time inventory, customer Khata ledger, and repair job tickets.
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {[
-                  { title: 'Super Admin License Manager', desc: 'Issue 15-Day to Lifetime Keys for client shops' },
-                  { title: 'Customer Khata (ادھار کھاتہ)', desc: 'Automatic debit/credit ledger & statement prints' },
-                  { title: 'Mobile Repair Work Orders', desc: 'Diagnostic tickets and claim receipts' },
-                  { title: 'Thermal & WhatsApp Invoices', desc: '80mm instant receipts with 1-click WhatsApp' },
+                  { title: 'Barcode POS & Thermal Receipts', desc: 'Fast counter billing and 80mm thermal receipt printing' },
+                  { title: 'Customer Khata (Ledger)', desc: 'Automatic debit/credit accounts and printable statements' },
+                  { title: 'Mobile Repair Work Orders', desc: 'Diagnostic tracking and customer claim receipts' },
+                  { title: 'License & Multi-Shop Manager', desc: 'Manage subscriptions, durations, and access control' },
                 ].map((feat, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <CheckCircleOutlined style={{ color: '#10b981', marginTop: 3 }} />
@@ -433,7 +397,7 @@ export default function LoginPage() {
               color: isDark ? '#94a3b8' : '#475569',
             }}>
               <SafetyCertificateOutlined style={{ color: '#2563eb', marginRight: 6 }} />
-              Protected by Hardware Machine Lock & Cloud Sync.
+              Enterprise Data Security & Cloud Sync
             </div>
           </div>
         )}
