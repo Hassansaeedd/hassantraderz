@@ -1,21 +1,19 @@
-// client/src/pages/pos/POSPage.jsx — Fluid Responsive Modern POS Counter with Direct PDF & Thermal Receipt
-import { useState, useEffect, useRef } from 'react';
+// client/src/pages/pos/POSPage.jsx — Paginated Modern POS Counter with Sticky Cart & Direct Receipts
+import { useState, useEffect } from 'react';
 import {
-  Row, Col, Card, Input, Button, Table, Space, Tag, Modal,
-  Form, Select, InputNumber, Divider, message, Badge, Drawer, Alert
+  Row, Col, Card, Input, Button, Space, Tag, Modal,
+  Form, Select, InputNumber, Divider, message, Badge, Drawer, Pagination
 } from 'antd';
 import {
   ShoppingCartOutlined, DeleteOutlined, PlusOutlined,
   MinusOutlined, PrinterOutlined, PauseCircleOutlined,
   PlayCircleOutlined, WhatsAppOutlined, SearchOutlined,
-  BarcodeOutlined, DownloadOutlined, CheckCircleOutlined,
-  ArrowRightOutlined
+  DownloadOutlined, CheckCircleOutlined, ArrowRightOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../../store/cartStore';
 import { formatCurrency } from '../../utils/formatters';
 import { printReceiptHTML } from '../../utils/thermalPrint';
-import ProductThumbnail from '../../components/common/ProductThumbnail';
 import api from '../../api/axiosInstance';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -34,6 +32,11 @@ export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [totalProducts, setTotalProducts] = useState(0);
+
   const [payModalVisible, setPayModalVisible] = useState(false);
   const [receiptModalVisible, setReceiptModalVisible] = useState(false);
   const [heldDrawerVisible, setHeldDrawerVisible] = useState(false);
@@ -45,7 +48,7 @@ export default function POSPage() {
   const [amountTendered, setAmountTendered] = useState(0);
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts('', null, 1);
     fetchCategories();
     fetchCustomers();
 
@@ -54,15 +57,18 @@ export default function POSPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchProducts = async (query = '', catId = null) => {
+  const fetchProducts = async (query = searchQuery, catId = selectedCategory, page = 1) => {
     setLoading(true);
     try {
-      let url = '/products?limit=100';
+      let url = `/products?page=${page}&limit=${pageSize}`;
       if (query) url += `&search=${encodeURIComponent(query)}`;
       if (catId) url += `&categoryId=${catId}`;
       const res = await api.get(url);
       const data = Array.isArray(res.data) ? res.data : (res.data?.data || res || []);
+      const meta = res.pagination || res.data?.pagination || {};
       setProducts(data);
+      setTotalProducts(meta.total !== undefined ? meta.total : (data.length || 0));
+      setCurrentPage(page);
     } catch {
       message.error('Failed to load products');
     } finally {
@@ -95,12 +101,17 @@ export default function POSPage() {
         return;
       }
     }
-    fetchProducts(val, selectedCategory);
+    fetchProducts(val, selectedCategory, 1);
   };
 
   const handleCategorySelect = (catId) => {
     setSelectedCategory(catId);
-    fetchProducts(searchQuery, catId);
+    fetchProducts(searchQuery, catId, 1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    fetchProducts(searchQuery, selectedCategory, page);
   };
 
   const handleOpenPayment = () => {
@@ -159,7 +170,7 @@ export default function POSPage() {
       cart.clearCart();
       setPayModalVisible(false);
       setReceiptModalVisible(true);
-      fetchProducts(searchQuery, selectedCategory);
+      fetchProducts(searchQuery, selectedCategory, currentPage);
       message.success('Sale completed successfully!');
     } catch (err) {
       message.error(err?.message || 'Failed to complete transaction');
@@ -268,7 +279,7 @@ export default function POSPage() {
 
   const isUrdu = i18n.language === 'ur';
 
-  // Shopping Cart Render Component (Shared for desktop & mobile drawer)
+  // Shopping Cart Render Component
   const renderCartContent = () => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       {/* Customer Selector */}
@@ -457,64 +468,79 @@ export default function POSPage() {
         ))}
       </div>
 
-      {/* Main Content: Left Product Catalog Grid & Right Cart (On Desktop) */}
+      {/* Main Content: Left Product Catalog Grid & Right Cart (Sticky on Desktop) */}
       <Row gutter={[14, 14]}>
-        {/* LEFT PANEL: Product Grid */}
+        {/* LEFT PANEL: Product Grid with Pagination */}
         <Col xs={24} lg={14} xl={15}>
-          <Card bodyStyle={{ padding: 12 }} style={{ minHeight: 450 }}>
+          <Card bodyStyle={{ padding: 12 }} style={{ minHeight: 450, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             {products.length === 0 && !loading ? (
               <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
                 <div>No products found matching your filter</div>
               </div>
             ) : (
-              <Row gutter={[10, 10]}>
-                {products.map(p => {
-                  const outOfStock = p.currentStock <= 0;
-                  return (
-                    <Col xs={12} sm={8} md={6} lg={8} xl={6} key={p.id}>
-                      <Card
-                        hoverable
-                        size="small"
-                        onClick={() => !outOfStock && cart.addItem(p)}
-                        style={{
-                          opacity: outOfStock ? 0.45 : 1,
-                          cursor: outOfStock ? 'not-allowed' : 'pointer',
-                          background: 'var(--bg-elevated)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 8,
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                        }}
-                        bodyStyle={{ padding: 8 }}
-                      >
-                        <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, minHeight: 34 }}>
-                          {isUrdu && p.nameUr ? p.nameUr : p.nameEn}
-                        </div>
-                        <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginBottom: 6 }}>
-                          {p.sku}
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                          <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 13.5 }}>
-                            {formatCurrency(p.sellingPrice)}
-                          </span>
-                          <Tag color={outOfStock ? 'red' : p.currentStock <= p.minStockLevel ? 'orange' : 'green'} style={{ margin: 0, fontWeight: 700 }}>
-                            {p.currentStock}
-                          </Tag>
-                        </div>
-                      </Card>
-                    </Col>
-                  );
-                })}
-              </Row>
+              <div>
+                <Row gutter={[10, 10]}>
+                  {products.map(p => {
+                    const outOfStock = p.currentStock <= 0;
+                    return (
+                      <Col xs={12} sm={8} md={6} lg={8} xl={6} key={p.id}>
+                        <Card
+                          hoverable
+                          size="small"
+                          onClick={() => !outOfStock && cart.addItem(p)}
+                          style={{
+                            opacity: outOfStock ? 0.45 : 1,
+                            cursor: outOfStock ? 'not-allowed' : 'pointer',
+                            background: 'var(--bg-elevated)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 8,
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                          }}
+                          bodyStyle={{ padding: 8 }}
+                        >
+                          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4, minHeight: 34 }}>
+                            {isUrdu && p.nameUr ? p.nameUr : p.nameEn}
+                          </div>
+                          <div style={{ fontSize: 10.5, color: 'var(--text-muted)', marginBottom: 6 }}>
+                            {p.sku}
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                            <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 13.5 }}>
+                              {formatCurrency(p.sellingPrice)}
+                            </span>
+                            <Tag color={outOfStock ? 'red' : p.currentStock <= p.minStockLevel ? 'orange' : 'green'} style={{ margin: 0, fontWeight: 700 }}>
+                              {p.currentStock}
+                            </Tag>
+                          </div>
+                        </Card>
+                      </Col>
+                    );
+                  })}
+                </Row>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalProducts > pageSize && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={totalProducts}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                />
+              </div>
             )}
           </Card>
         </Col>
 
-        {/* RIGHT PANEL: Shopping Cart (Shown side-by-side on desktop >= 992px) */}
+        {/* RIGHT PANEL: Floating Sticky Shopping Cart (Desktop >= 992px) */}
         {!isMobile && (
-          <Col xs={24} lg={10} xl={9}>
+          <Col xs={24} lg={10} xl={9} style={{ position: 'sticky', top: 76, height: 'calc(100vh - 96px)', zIndex: 10 }}>
             <Card
               title={
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -527,7 +553,7 @@ export default function POSPage() {
                   </Button>
                 </div>
               }
-              bodyStyle={{ padding: 12 }}
+              bodyStyle={{ padding: 12, display: 'flex', flexDirection: 'column', height: 'calc(100% - 46px)' }}
               style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', height: '100%' }}
             >
               {renderCartContent()}

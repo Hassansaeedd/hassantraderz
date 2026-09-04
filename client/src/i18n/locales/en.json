@@ -46,8 +46,12 @@
   "pos": {
     "title": "Point of Sale",
     "searchProduct": "Search product by name, SKU or scan barcode...",
+    "searchPlaceholder": "Search by product name, SKU or scan barcode...",
+    "allCategories": "All Categories",
     "cart": "Cart",
     "emptyCart": "Cart is empty",
+    "cartEmpty": "Cart is empty",
+    "clearCart": "Clear Cart",
     "addToCart": "Add to Cart",
     "removeItem": "Remove",
     "quantity": "Qty",

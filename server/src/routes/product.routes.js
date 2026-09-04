@@ -18,13 +18,53 @@ router.get('/', asyncHandler(async (req, res) => {
   const { search, categoryId, brandId, lowStock } = req.query;
 
   const where = { isActive: true };
-  if (search) where.OR = [
-    { nameEn: { contains: search } },
-    { nameUr: { contains: search } },
-    { sku: { contains: search } },
-    { barcode: { contains: search } },
-  ];
-  if (categoryId) where.categoryId = categoryId;
+  if (search) {
+    where.OR = [
+      { nameEn: { contains: search, mode: 'insensitive' } },
+      { nameUr: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
+      { barcode: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  if (categoryId) {
+    const cat = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (cat) {
+      const catLower = cat.nameEn.toLowerCase();
+      if (catLower.includes('access') || catLower.includes('charger') || catLower.includes('cable') || catLower.includes('ear') || catLower.includes('case') || catLower.includes('cover') || catLower.includes('power')) {
+        where.OR = [
+          { categoryId: categoryId },
+          { sku: { startsWith: 'ACC', mode: 'insensitive' } },
+          { sku: { startsWith: 'REP', mode: 'insensitive' } },
+          { nameEn: { contains: 'AirPod', mode: 'insensitive' } },
+          { nameEn: { contains: 'Earbud', mode: 'insensitive' } },
+          { nameEn: { contains: 'Charger', mode: 'insensitive' } },
+          { nameEn: { contains: 'Cable', mode: 'insensitive' } },
+          { nameEn: { contains: 'Power Bank', mode: 'insensitive' } },
+          { nameEn: { contains: 'Adapter', mode: 'insensitive' } },
+          { nameEn: { contains: 'Battery', mode: 'insensitive' } },
+          { nameEn: { contains: 'Case', mode: 'insensitive' } },
+          { nameEn: { contains: 'Cover', mode: 'insensitive' } },
+          { nameEn: { contains: 'Headset', mode: 'insensitive' } },
+          { nameEn: { contains: 'Speaker', mode: 'insensitive' } },
+          { nameEn: { contains: 'Glue', mode: 'insensitive' } },
+        ];
+      } else if (catLower.includes('smart') || catLower.includes('phone')) {
+        where.OR = [
+          { categoryId: categoryId },
+          { sku: { startsWith: 'MOB', mode: 'insensitive' } },
+          { nameEn: { contains: 'Galaxy', mode: 'insensitive' } },
+          { nameEn: { contains: 'iPhone', mode: 'insensitive' } },
+          { nameEn: { contains: 'Redmi', mode: 'insensitive' } },
+        ];
+      } else {
+        where.categoryId = categoryId;
+      }
+    } else {
+      where.categoryId = categoryId;
+    }
+  }
+
   if (brandId) where.brandId = brandId;
 
   const [products, total] = await Promise.all([

@@ -1,4 +1,4 @@
-// client/src/components/layout/Sidebar.jsx — Sleek Minimal Glassmorphic Sticky Sidebar
+// client/src/components/layout/Sidebar.jsx — Floating Fixed Minimal Glassmorphic Sidebar
 import { Layout } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,7 @@ import {
 
 const { Sider } = Layout;
 
-export default function Sidebar({ collapsed, onNavClick }) {
+export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
   const { t, i18n } = useTranslation();
   const navigate    = useNavigate();
   const location    = useLocation();
@@ -56,8 +56,10 @@ export default function Sidebar({ collapsed, onNavClick }) {
       className="glass-sidebar"
       style={{
         height: '100vh',
-        position: 'sticky',
+        position: isDrawer ? 'relative' : 'fixed',
+        left: 0,
         top: 0,
+        bottom: 0,
         overflowY: 'auto',
         zIndex: 100,
         flexShrink: 0,

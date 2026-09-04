@@ -44,10 +44,14 @@
     "revenueChart": "آمدنی (آخری 30 دن)"
   },
   "pos": {
-    "title": "فروخت",
+    "title": "فروخت کاؤنٹر",
     "searchProduct": "نام، SKU سے تلاش کریں یا بارکوڈ اسکین کریں...",
+    "searchPlaceholder": "مصنوع کا نام، SKU یا بارکوڈ سے تلاش کریں...",
+    "allCategories": "تمام کیٹیگریز",
     "cart": "ٹوکری",
     "emptyCart": "ٹوکری خالی ہے",
+    "cartEmpty": "ٹوکری خالی ہے",
+    "clearCart": "ٹوکری خالی کریں",
     "addToCart": "ٹوکری میں شامل کریں",
     "removeItem": "ہٹائیں",
     "quantity": "تعداد",

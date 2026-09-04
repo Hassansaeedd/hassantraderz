@@ -1,4 +1,4 @@
-// client/src/components/layout/AppLayout.jsx — Zero-Gap Responsive Layout (PC & Mobile Browser)
+// client/src/components/layout/AppLayout.jsx — Zero-Gap Responsive Layout with Floating Sidebar
 import { useState, useEffect } from 'react';
 import { Layout, Button, Dropdown, Space, Avatar, Drawer } from 'antd';
 import {
@@ -88,7 +88,7 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--bg-base)', width: '100%' }}>
-      {/* Desktop Persistent Sidebar (Only in DOM when screen > 992px) */}
+      {/* Desktop Floating Sidebar (Fixed left: 0) */}
       {!isMobile && (
         <Sidebar collapsed={collapsed} />
       )}
@@ -102,13 +102,15 @@ export default function AppLayout() {
         width={260}
         closable={false}
       >
-        <Sidebar collapsed={false} onNavClick={() => setMobileVisible(false)} />
+        <Sidebar collapsed={false} isDrawer={true} onNavClick={() => setMobileVisible(false)} />
       </Drawer>
 
-      {/* Main Workspace Layout (Naturally flexes with 0 gap) */}
+      {/* Main Workspace Layout (Offset by sidebar width on desktop) */}
       <Layout
         className="main-layout-container"
         style={{
+          marginInlineStart: isMobile ? 0 : (collapsed ? 80 : 240),
+          transition: 'margin-inline-start 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           background: 'transparent',
           minWidth: 0,
           flex: 1,
