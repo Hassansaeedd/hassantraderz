@@ -234,6 +234,26 @@ export default function LoginPage() {
                 </Button>
               </Form.Item>
             </Form>
+
+            {/* Self-Registration 15-Day Free Trial Link */}
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <Button
+                type="dashed"
+                block
+                onClick={() => navigate('/register')}
+                style={{
+                  height: 40,
+                  borderRadius: 10,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  borderColor: isDark ? 'rgba(37, 99, 235, 0.5)' : '#93c5fd',
+                  color: isDark ? '#93c5fd' : '#2563eb',
+                  background: isDark ? 'rgba(37, 99, 235, 0.08)' : '#eff6ff',
+                }}
+              >
+                Register New Shop (15-Day Free Trial)
+              </Button>
+            </div>
           </div>
 
           {/* Minimal Clean Footer */}

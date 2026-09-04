@@ -129,3 +129,71 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   // Revoke all refresh tokens on password change
   await prisma.refreshToken.deleteMany({ where: { userId } });
 };
+
+export const registerShop = async ({ shopName, ownerName, phone, email, username, password, ipAddress }) => {
+  // Check if username already exists
+  const existingUser = await prisma.user.findFirst({
+    where: { OR: [{ username }, ...(email ? [{ email }] : [])] }
+  });
+
+  if (existingUser) {
+    if (existingUser.username === username) {
+      throw new AuthenticationError('Username is already taken. Please choose another.');
+    }
+    throw new AuthenticationError('Email address is already registered.');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  // 1. Create shop user
+  const user = await prisma.user.create({
+    data: {
+      username,
+      email: email || null,
+      phone: phone || null,
+      fullName: ownerName || shopName,
+      passwordHash,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+    },
+    select: {
+      id: true, username: true, fullName: true,
+      email: true, phone: true, role: true,
+      status: true, language: true,
+    }
+  });
+
+  // 2. Automatically generate a 15-Day Free Trial License for this new shop
+  const randKey = `HT-TRIAL-15D-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 15);
+
+  const trialLicense = await prisma.license.create({
+    data: {
+      licenseKey: randKey,
+      shopName: shopName || `${ownerName}'s Mobile Shop`,
+      ownerName: ownerName || user.fullName,
+      ownerPhone: phone || null,
+      duration: '15_DAYS',
+      status: 'ACTIVE',
+      activatedAt: new Date(),
+      expiresAt,
+      userId: user.id,
+      notes: 'Self-registered 15-Day Free Trial',
+    }
+  });
+
+  // 3. Issue JWT tokens
+  const accessToken  = signAccessToken(user.id, user.role);
+  const refreshToken = signRefreshToken(user.id);
+  const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  await prisma.refreshToken.create({ data: { token: refreshToken, userId: user.id, expiresAt: refreshExpiresAt } });
+
+  // Log activity
+  await prisma.activityLog.create({
+    data: { userId: user.id, action: 'SHOP_REGISTERED', ipAddress, description: `New shop ${shopName} registered with 15-day trial` },
+  });
+
+  return { user, license: trialLicense, accessToken, refreshToken };
+};
+

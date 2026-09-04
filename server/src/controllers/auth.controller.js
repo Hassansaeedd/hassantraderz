@@ -52,3 +52,21 @@ export const changePassword = asyncHandler(async (req, expressRes) => {
   await authService.changePassword(req.user.userId, currentPassword, newPassword);
   return res.success(expressRes, null, 'Password changed successfully. Please log in again.');
 });
+
+export const register = asyncHandler(async (req, expressRes) => {
+  const { shopName, ownerName, phone, email, username, password } = req.body;
+  const ip = req.ip;
+
+  if (!username || !password || !shopName) {
+    return expressRes.status(400).json({ success: false, message: 'Shop name, username, and password are required' });
+  }
+
+  const { user, license, accessToken, refreshToken } = await authService.registerShop({
+    shopName, ownerName, phone, email, username, password, ipAddress: ip
+  });
+
+  expressRes.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTS);
+
+  return res.created(expressRes, { user, license, accessToken }, '🎉 Shop account registered successfully with a 15-Day Free Trial!');
+});
+

@@ -34,6 +34,7 @@ model User {
   repairs        RepairTicket[]
   tradeIns       TradeIn[]
   expenses       Expense[]
+  licenses       License[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -450,3 +451,31 @@ model Setting {
 
   @@map("settings")
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SOFTWARE LICENSES & MULTI-SHOP TRIAL KEYS (لائسنس اور سبسکرپشن مینجمنٹ)
+// ═════════════════════════════════════════════════════════════════════════════
+
+model License {
+  id                String    @id @default(cuid())
+  licenseKey        String    @unique
+  shopName          String
+  ownerName         String?
+  ownerPhone        String?
+  duration          String    @default("15_DAYS") // 15_DAYS, 30_DAYS, 90_DAYS, 180_DAYS, 365_DAYS, LIFETIME
+  status            String    @default("ACTIVE")   // ACTIVE, EXPIRED, REVOKED, UNASSIGNED
+  activatedAt       DateTime  @default(now())
+  expiresAt         DateTime? // Null indicates Lifetime license
+  hardwareMachineId String?
+  maxDevices        Int       @default(3)
+  notes             String?
+
+  userId            String?
+  user              User?     @relation(fields: [userId], references: [id])
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("licenses")
+}
+

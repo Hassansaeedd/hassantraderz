@@ -16,6 +16,7 @@ import repairRoutes from './repair.routes.js';
 import tradeinRoutes from './tradein.routes.js';
 import expenseRoutes from './expense.routes.js';
 import backupRoutes from './backup.routes.js';
+import licenseRoutes from './license.routes.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use('/auth', authRoutes);
 
 // Protected Core Operations
 router.use('/users',      userRoutes);
+router.use('/licenses',   licenseRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/brands',     brandRoutes);
 router.use('/products',   productRoutes);

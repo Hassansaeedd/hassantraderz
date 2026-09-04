@@ -38,6 +38,7 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
     { type: 'divider',   label: 'Management', hidden: !isManager },
     { key: '/reports',   icon: <BarChartOutlined />,  label: t('nav.reports'),  hidden: !isManager },
     { key: '/users',     icon: <UserOutlined />,      label: t('nav.users'),    hidden: !isAdmin },
+    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses', hidden: !isAdmin },
     { key: '/settings',  icon: <SettingOutlined />,   label: t('nav.settings'), hidden: !isAdmin },
   ].filter(item => !item.hidden);
 

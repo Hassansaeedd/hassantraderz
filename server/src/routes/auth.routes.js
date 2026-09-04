@@ -8,6 +8,7 @@ import { loginSchema, changePasswordSchema } from '../validators/auth.validator.
 const router = Router();
 
 router.post('/login',           validate(loginSchema),          authController.login);
+router.post('/register',                                        authController.register);
 router.post('/refresh',                                         authController.refresh);
 router.post('/logout',          authMiddleware,                 authController.logout);
 router.get('/me',               authMiddleware,                 authController.me);

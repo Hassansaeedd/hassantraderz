@@ -4,6 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 import AppLayout from '../components/layout/AppLayout';
 
 import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
 import POSPage from '../pages/pos/POSPage';
 import ProductsPage from '../pages/inventory/ProductsPage';
@@ -20,13 +21,15 @@ import RepairsPage from '../pages/repairs/RepairsPage';
 import TradeInPage from '../pages/tradein/TradeInPage';
 import KhataPage from '../pages/khata/KhataPage';
 import ExpensesPage from '../pages/expenses/ExpensesPage';
+import LicenseManagementPage from '../pages/admin/LicenseManagementPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 export default function AppRouter() {
   return (
     <Routes>
-      {/* Public Login Route */}
+      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* Main Protected Workspace */}
       <Route element={<ProtectedRoute />}>
@@ -50,6 +53,7 @@ export default function AppRouter() {
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/licenses" element={<LicenseManagementPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/users" element={<UsersPage />} />
         </Route>
