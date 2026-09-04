@@ -63,11 +63,14 @@ export default function ExpensesPage() {
     try {
       const res = await api.get('/reports/dashboard');
       const data = res.data?.data || res.data || res;
+      const todayRev = Number(data?.today?.revenue ?? 0);
       setSalesSummary({
-        revenue: Number(data?.today?.revenue || 125000),
-        profit: Number(data?.today?.revenue || 125000) * 0.22,
+        revenue: todayRev,
+        profit: todayRev * 0.22,
       });
-    } catch {}
+    } catch {
+      setSalesSummary({ revenue: 0, profit: 0 });
+    }
   };
 
   const handleAddExpense = async (values) => {

@@ -52,12 +52,7 @@ export default function KhataPage() {
     if (stored) {
       setKhataEntries(JSON.parse(stored));
     } else {
-      const initial = [
-        { id: '1', date: new Date(Date.now() - 86400000 * 3).toISOString(), description: 'Mobile Purchase (Partial Credit)', type: 'DEBIT', amount: 35000, balance: 35000 },
-        { id: '2', date: new Date(Date.now() - 86400000 * 1).toISOString(), description: 'Installment Payment Received (Cash)', type: 'CREDIT', amount: 10000, balance: 25000 },
-      ];
-      localStorage.setItem(`khata_${cust.id}`, JSON.stringify(initial));
-      setKhataEntries(initial);
+      setKhataEntries([]);
     }
   };
 
