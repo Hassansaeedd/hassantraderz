@@ -1,7 +1,12 @@
-// client/src/pages/auth/LoginPage.jsx — Dynamic Light/Dark Responsive Minimalist Glassmorphic Login Portal
+// client/src/pages/auth/LoginPage.jsx — Unified Login & Shop Self-Registration Portal
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Segmented } from 'antd';
-import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone, SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message, Segmented, Row, Col, Alert, Tag } from 'antd';
+import {
+  UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone,
+  SunOutlined, MoonOutlined, ShopOutlined, PhoneOutlined,
+  KeyOutlined, CheckCircleOutlined, SafetyCertificateOutlined,
+  ThunderboltOutlined
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
@@ -14,8 +19,13 @@ export default function LoginPage() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const { mode, toggleTheme } = useThemeStore();
   const isDark = mode === 'dark';
+
+  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const [loginForm] = Form.useForm();
+  const [registerForm] = Form.useForm();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -23,18 +33,66 @@ export default function LoginPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const onFinish = async (values) => {
+  // Handle Login (Admin, Manager, or Shop Cashier)
+  const handleLogin = async (values) => {
     setLoading(true);
     try {
       const res = await api.post('/auth/login', values);
-      setAuth(res.data.user, res.data.accessToken);
-      message.success(`Welcome back, ${res.data.user.fullName}!`);
-      navigate('/dashboard');
+      const user = res.data.user;
+      const token = res.data.accessToken;
+      setAuth(user, token);
+      message.success(`Welcome back, ${user.fullName || user.username}!`);
+      
+      if (user.role === 'ADMIN') {
+        navigate('/dashboard');
+      } else {
+        navigate('/pos');
+      }
     } catch (err) {
-      message.error(err?.message || t('auth.invalidCreds'));
+      message.error(err?.message || 'Invalid username or password');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle Self-Registration with 15-Day Free Trial
+  const handleRegister = async (values) => {
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/register', values);
+      const user = res.data?.user || res.data?.data?.user;
+      const token = res.data?.accessToken || res.data?.data?.accessToken;
+      const lic = res.data?.license || res.data?.data?.license;
+
+      if (user && token) {
+        setAuth(user, token);
+        if (lic) {
+          localStorage.setItem('software_license', JSON.stringify({
+            licenseKey: lic.licenseKey,
+            plan: '15-Day Free Trial',
+            status: 'ACTIVE',
+            activatedOn: new Date().toLocaleDateString(),
+            expiresOn: new Date(lic.expiresAt).toLocaleDateString(),
+            shopName: lic.shopName,
+          }));
+        }
+        message.success(`🎉 Welcome to Hassan Traderz! Your 15-Day Free Trial is active!`);
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      message.error(err?.message || 'Registration failed. Username may already exist.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Quick 1-Click Super Admin Fill
+  const handleQuickFillAdmin = () => {
+    loginForm.setFieldsValue({
+      username: 'admin',
+      password: 'Admin@123',
+    });
+    message.info('Filled Super Admin credentials (admin / Admin@123)');
   };
 
   const switchLang = (lang) => i18n.changeLanguage(lang);
@@ -54,88 +112,54 @@ export default function LoginPage() {
       overflow: 'hidden',
       transition: 'background 0.3s ease',
     }}>
-      {/* Subtle Ambient Radial Glows */}
+      {/* Background Ambient Glows */}
       <div style={{
-        position: 'absolute',
-        top: '-15%',
-        left: '10%',
-        width: 600,
-        height: 600,
-        background: isDark
-          ? 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)'
-          : 'radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 70%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-15%',
-        right: '10%',
-        width: 600,
-        height: 600,
-        background: isDark
-          ? 'radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%)'
-          : 'radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none',
+        position: 'absolute', top: '-15%', left: '10%', width: 600, height: 600,
+        background: isDark ? 'radial-gradient(circle, rgba(37, 99, 235, 0.09) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 70%)',
+        filter: 'blur(60px)', pointerEvents: 'none',
       }} />
 
-      {/* Main Glassmorphic Split / Mobile Container */}
+      {/* Main Container */}
       <div style={{
         width: '100%',
-        maxWidth: isMobile ? 440 : 920,
+        maxWidth: isMobile ? 440 : 960,
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         borderRadius: 20,
         overflow: 'hidden',
-        background: isDark ? 'rgba(17, 24, 39, 0.85)' : 'rgba(255, 255, 255, 0.92)',
+        background: isDark ? 'rgba(17, 24, 39, 0.9)' : 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
         border: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(255, 255, 255, 0.95)',
-        boxShadow: isDark
-          ? '0 25px 60px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1)'
-          : '0 25px 60px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(37, 99, 235, 0.04)',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.25)',
         position: 'relative',
         zIndex: 1,
-        minHeight: isMobile ? 'auto' : 480,
-        transition: 'all 0.3s ease',
+        minHeight: isMobile ? 'auto' : 560,
       }}>
 
-        {/* LEFT PANEL: Clean Minimalist Login Form */}
+        {/* LEFT PANEL: Form with Sign In & Register Tabs */}
         <div style={{
-          flex: 1.1,
-          padding: isMobile ? '28px 20px' : '44px 40px',
+          flex: 1.2,
+          padding: isMobile ? '24px 18px' : '36px 36px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
         }}>
           <div>
             {/* Top Bar: Brand, Theme Switcher & Language */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 20 : 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <img
                   src="/logo.png"
                   alt="Hassan Traderz Logo"
-                  style={{
-                    width: isMobile ? 36 : 42,
-                    height: isMobile ? 36 : 42,
-                    borderRadius: 10,
-                    objectFit: 'cover',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)',
-                  }}
+                  style={{ width: 38, height: 38, borderRadius: 10, objectFit: 'cover' }}
                 />
                 <div>
-                  <h1 style={{
-                    fontSize: isMobile ? 16 : 18,
-                    fontWeight: 800,
-                    color: isDark ? '#f8fafc' : '#0f172a',
-                    margin: 0,
-                    letterSpacing: -0.2,
-                  }}>
+                  <h1 style={{ fontSize: 17, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: 0 }}>
                     Hassan Traderz
                   </h1>
-                  <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 11.5, fontWeight: 500 }}>
-                    Enterprise POS Suite
+                  <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 11.5 }}>
+                    Enterprise POS Suite v2.4
                   </span>
                 </div>
               </div>
@@ -145,171 +169,274 @@ export default function LoginPage() {
                   size="small"
                   icon={isDark ? <SunOutlined style={{ color: '#f59e0b' }} /> : <MoonOutlined style={{ color: '#6366f1' }} />}
                   onClick={toggleTheme}
-                  style={{
-                    borderRadius: 8,
-                    background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.9)',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
-                    color: isDark ? '#f8fafc' : '#0f172a',
-                  }}
+                  style={{ borderRadius: 8 }}
                 />
                 <Segmented
                   size="small"
                   options={[{ label: 'EN', value: 'en' }, { label: 'اردو', value: 'ur' }]}
                   value={i18n.language}
                   onChange={switchLang}
-                  style={{
-                    background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.9)',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
-                    fontSize: 11.5,
-                  }}
                 />
               </div>
             </div>
 
-            {/* Form Title */}
-            <div style={{ marginBottom: isMobile ? 18 : 24 }}>
-              <h2 style={{
-                fontSize: isMobile ? 18 : 20,
+            {/* TAB SELECTOR: Sign In vs Register New Shop */}
+            <Segmented
+              block
+              size="large"
+              value={activeTab}
+              onChange={setActiveTab}
+              options={[
+                { label: '🔑 Sign In / Admin Login', value: 'login' },
+                { label: '✨ Register Shop (15-Day Free Trial)', value: 'register' },
+              ]}
+              style={{
+                marginBottom: 20,
+                padding: 4,
+                borderRadius: 12,
                 fontWeight: 700,
-                color: isDark ? '#f8fafc' : '#0f172a',
-                margin: 0,
-              }}>
-                Sign In
-              </h2>
-              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12.5, marginTop: 3, marginBottom: 0 }}>
-                Enter your credentials to access the POS counter
-              </p>
-            </div>
+                background: isDark ? 'rgba(30, 41, 59, 0.8)' : '#e2e8f0',
+              }}
+            />
 
-            {/* Clean Form Controls */}
-            <Form layout="vertical" onFinish={onFinish} size="large">
-              <Form.Item name="username" rules={[{ required: true, message: 'Username is required' }]}>
-                <Input
-                  prefix={<UserOutlined style={{ color: isDark ? '#64748b' : '#94a3b8' }} />}
-                  placeholder={t('auth.username')}
-                  autoComplete="username"
-                  style={{
-                    borderRadius: 10,
-                    background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
-                    color: isDark ? '#f8fafc' : '#0f172a',
-                    height: 44,
-                  }}
-                />
-              </Form.Item>
+            {/* ──────── TAB 1: SIGN IN (ADMIN & CASHIER) ──────── */}
+            {activeTab === 'login' && (
+              <div>
+                <div style={{ marginBottom: 16 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: 0 }}>
+                    Sign In to Portal
+                  </h2>
+                  <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 12.5, margin: '2px 0 0' }}>
+                    Enter credentials to access POS counter or Super Admin Panel
+                  </p>
+                </div>
 
-              <Form.Item name="password" rules={[{ required: true, message: 'Password is required' }]}>
-                <Input.Password
-                  prefix={<LockOutlined style={{ color: isDark ? '#64748b' : '#94a3b8' }} />}
-                  placeholder={t('auth.password')}
-                  autoComplete="current-password"
-                  style={{
-                    borderRadius: 10,
-                    background: isDark ? 'rgba(30, 41, 59, 0.6)' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
-                    color: isDark ? '#f8fafc' : '#0f172a',
-                    height: 44,
-                  }}
-                  iconRender={(visible) => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined style={{ color: '#94a3b8' }} />}
-                />
-              </Form.Item>
+                <Form form={loginForm} layout="vertical" onFinish={handleLogin} size="large">
+                  <Form.Item name="username" rules={[{ required: true, message: 'Username is required' }]}>
+                    <Input
+                      prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
+                      placeholder="Username (e.g. admin or shop username)"
+                      style={{ borderRadius: 10, height: 44 }}
+                    />
+                  </Form.Item>
 
-              <Form.Item style={{ marginTop: 20, marginBottom: 0 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                  loading={loading}
-                  style={{
-                    height: 44,
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: 700,
-                    background: '#2563eb',
-                    borderColor: '#2563eb',
-                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
-                  }}
-                >
-                  {loading ? t('auth.loggingIn') : 'Sign In'}
-                </Button>
-              </Form.Item>
-            </Form>
+                  <Form.Item name="password" rules={[{ required: true, message: 'Password is required' }]}>
+                    <Input.Password
+                      prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
+                      placeholder="Password"
+                      style={{ borderRadius: 10, height: 44 }}
+                    />
+                  </Form.Item>
 
-            {/* Self-Registration 15-Day Free Trial Link */}
-            <div style={{ marginTop: 16, textAlign: 'center' }}>
-              <Button
-                type="dashed"
-                block
-                onClick={() => navigate('/register')}
-                style={{
-                  height: 40,
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    block
+                    loading={loading}
+                    style={{
+                      height: 46,
+                      borderRadius: 10,
+                      fontSize: 14.5,
+                      fontWeight: 800,
+                      background: '#2563eb',
+                      borderColor: '#2563eb',
+                      boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+                      marginTop: 4,
+                    }}
+                  >
+                    {loading ? 'Authenticating...' : 'Sign In'}
+                  </Button>
+                </Form>
+
+                {/* Quick 1-Click Super Admin Fill Button */}
+                <div style={{
+                  marginTop: 16,
+                  padding: '10px 12px',
+                  background: isDark ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
                   borderRadius: 10,
-                  fontWeight: 700,
-                  fontSize: 13,
-                  borderColor: isDark ? 'rgba(37, 99, 235, 0.5)' : '#93c5fd',
-                  color: isDark ? '#93c5fd' : '#2563eb',
-                  background: isDark ? 'rgba(37, 99, 235, 0.08)' : '#eff6ff',
-                }}
-              >
-                Register New Shop (15-Day Free Trial)
-              </Button>
-            </div>
+                  border: isDark ? '1px dashed rgba(255, 255, 255, 0.15)' : '1px dashed #cbd5e1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 12, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                      👑 Master Admin Login
+                    </div>
+                    <div style={{ fontSize: 11, color: isDark ? '#94a3b8' : '#64748b' }}>
+                      User: <code>admin</code> | Pass: <code>Admin@123</code>
+                    </div>
+                  </div>
+                  <Button
+                    size="small"
+                    type="primary"
+                    ghost
+                    icon={<ThunderboltOutlined />}
+                    onClick={handleQuickFillAdmin}
+                    style={{ borderRadius: 6, fontWeight: 700 }}
+                  >
+                    1-Click Admin
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ──────── TAB 2: REGISTER NEW SHOP (15-DAY FREE TRIAL) ──────── */}
+            {activeTab === 'register' && (
+              <div>
+                <Alert
+                  type="info"
+                  showIcon
+                  icon={<CheckCircleOutlined style={{ color: '#2563eb' }} />}
+                  message="15-Day Free Trial Included"
+                  description="Register your mobile shop to test Barcodes, POS Billing, Repairs, and Khata."
+                  style={{ marginBottom: 16, borderRadius: 10 }}
+                />
+
+                <Form form={registerForm} layout="vertical" onFinish={handleRegister} size="middle">
+                  <Form.Item
+                    name="shopName"
+                    label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Mobile Shop Name (دکان کا نام)</span>}
+                    rules={[{ required: true, message: 'Shop name is required' }]}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Input prefix={<ShopOutlined style={{ color: '#94a3b8' }} />} placeholder="e.g. Al-Madina Mobile Center" />
+                  </Form.Item>
+
+                  <Row gutter={8}>
+                    <Col span={12}>
+                      <Form.Item
+                        name="ownerName"
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Owner Name</span>}
+                        rules={[{ required: true, message: 'Required' }]}
+                        style={{ marginBottom: 12 }}
+                      >
+                        <Input placeholder="e.g. Zubair Ahmad" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="phone"
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>WhatsApp Phone</span>}
+                        rules={[{ required: true, message: 'Required' }]}
+                        style={{ marginBottom: 12 }}
+                      >
+                        <Input placeholder="03001234567" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Row gutter={8}>
+                    <Col span={12}>
+                      <Form.Item
+                        name="username"
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Login Username</span>}
+                        rules={[{ required: true, message: 'Required', min: 3 }]}
+                        style={{ marginBottom: 12 }}
+                      >
+                        <Input placeholder="e.g. madinamobile" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="password"
+                        label={<span style={{ fontWeight: 700, fontSize: 12.5 }}>Login Password</span>}
+                        rules={[{ required: true, message: 'Required', min: 6 }]}
+                        style={{ marginBottom: 12 }}
+                      >
+                        <Input.Password placeholder="Min 6 chars" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    block
+                    size="large"
+                    loading={loading}
+                    style={{
+                      height: 44,
+                      borderRadius: 10,
+                      fontSize: 14,
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      borderColor: '#2563eb',
+                      marginTop: 4,
+                    }}
+                  >
+                    {loading ? 'Creating Shop...' : 'Start 15-Day Free Trial'}
+                  </Button>
+                </Form>
+              </div>
+            )}
           </div>
 
-          {/* Minimal Clean Footer */}
-          <div style={{
-            marginTop: 20,
-            paddingTop: 14,
-            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
+          {/* Footer */}
+          <div style={{ marginTop: 20, paddingTop: 12, borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: isDark ? '#64748b' : '#94a3b8' }}>
-              v2.4 Commercial Edition
+              Hassan Traderz Commercial POS
             </span>
-            <span style={{ fontSize: 11, color: isDark ? '#64748b' : '#94a3b8' }}>
-              © {new Date().getFullYear()} Hassan Traderz
+            <span style={{ fontSize: 11, color: '#10b981', fontWeight: 600 }}>
+              ● Cloud Online
             </span>
           </div>
         </div>
 
-        {/* RIGHT PANEL: Tech Artwork Showcase (Only on Desktop >= 768px) */}
+        {/* RIGHT PANEL: Tech Showcase Feature Grid (Desktop Only) */}
         {!isMobile && (
           <div style={{
-            flex: 0.95,
-            position: 'relative',
-            overflow: 'hidden',
-            borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
-            background: isDark ? '#090d16' : '#0f172a',
+            flex: 0.9,
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)'
+              : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+            padding: '36px 30px',
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            borderLeft: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
           }}>
-            <img
-              src="/login_gadgets.jpg"
-              alt="Mobile POS System"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isDark ? 0.85 : 0.9 }}
-            />
-
-            {/* Subtle Dark Vignette & Caption */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(180deg, rgba(11, 15, 25, 0.1) 0%, rgba(11, 15, 25, 0.85) 100%)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              padding: 32,
-            }}>
-              <h3 style={{ color: '#f8fafc', fontSize: 18, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.3 }}>
-                Mobile Shop Management Suite
+            <div>
+              <Tag color="blue" style={{ fontWeight: 800, borderRadius: 6, marginBottom: 12 }}>
+                MULTI-SHOP POS & REPAIRS
+              </Tag>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: '0 0 10px', lineHeight: 1.3 }}>
+                Everything your Mobile Shop needs in one place
               </h3>
-              <p style={{ color: '#cbd5e1', fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
-                POS Billing • Inventory Control • Repair Work Orders • Khata Ledger
+              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
+                Manage smartphones, bulk CSV stock, barcode scanning, customer Khata ledgers, and technician repair work orders.
               </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { title: 'Super Admin License Manager', desc: 'Issue 15-Day to Lifetime Keys for client shops' },
+                  { title: 'Customer Khata (ادھار کھاتہ)', desc: 'Automatic debit/credit ledger & statement prints' },
+                  { title: 'Mobile Repair Work Orders', desc: 'Diagnostic tickets and claim receipts' },
+                  { title: 'Thermal & WhatsApp Invoices', desc: '80mm instant receipts with 1-click WhatsApp' },
+                ].map((feat, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <CheckCircleOutlined style={{ color: '#10b981', marginTop: 3 }} />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 12.5, color: isDark ? '#f8fafc' : '#1e293b' }}>{feat.title}</div>
+                      <div style={{ fontSize: 11, color: isDark ? '#94a3b8' : '#64748b' }}>{feat.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              background: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)',
+              padding: '12px 14px',
+              borderRadius: 10,
+              fontSize: 11.5,
+              color: isDark ? '#94a3b8' : '#475569',
+            }}>
+              <SafetyCertificateOutlined style={{ color: '#2563eb', marginRight: 6 }} />
+              Protected by Hardware Machine Lock & Cloud Sync.
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
