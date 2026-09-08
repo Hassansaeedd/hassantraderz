@@ -217,10 +217,19 @@ router.delete('/bulk-delete-all', managerOrAdmin, asyncHandler(async (req, res) 
   }
 }));
 
-// DELETE /products/:id (soft delete)
+// DELETE /products/:id (permanent delete)
 router.delete('/:id', managerOrAdmin, asyncHandler(async (req, res) => {
-  await prisma.product.update({ where: { id: req.params.id }, data: { isActive: false } });
-  return apiRes.success(res, null, 'Product deactivated');
+  try {
+    await prisma.$transaction([
+      prisma.stockMovement.deleteMany({ where: { productId: req.params.id } }),
+      prisma.productVariant.deleteMany({ where: { productId: req.params.id } }),
+      prisma.product.delete({ where: { id: req.params.id } }),
+    ]);
+    return apiRes.success(res, null, 'Product permanently deleted');
+  } catch (err) {
+    await prisma.product.update({ where: { id: req.params.id }, data: { isActive: false, currentStock: 0 } });
+    return apiRes.success(res, null, 'Product removed from inventory');
+  }
 }));
 
 export default router;
