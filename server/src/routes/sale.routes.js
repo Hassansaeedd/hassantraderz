@@ -76,13 +76,13 @@ router.post('/', validate(createSaleSchema), asyncHandler(async (req, res) => {
       }
 
       const lineSubtotal  = item.unitPrice * item.quantity;
-      const lineDiscount  = lineSubtotal * item.discountPct / 100;
+      const lineDiscount  = lineSubtotal * (item.discountPct || 0) / 100;
       const lineAfterDisc = lineSubtotal - lineDiscount;
-      const lineGst       = lineAfterDisc * Number(product.gstRate) / 100;
+      const lineGst       = 0;
       subtotal  += lineAfterDisc;
-      gstAmount += lineGst;
+      gstAmount += 0;
 
-      enrichedItems.push({ productId: item.productId, quantity: item.quantity, unitPrice: item.unitPrice, discountPct: item.discountPct, discountAmt: lineDiscount, gstRate: product.gstRate, gstAmount: lineGst, totalAmount: lineAfterDisc + lineGst });
+      enrichedItems.push({ productId: item.productId, quantity: item.quantity, unitPrice: item.unitPrice, discountPct: item.discountPct || 0, discountAmt: lineDiscount, gstRate: 0, gstAmount: 0, totalAmount: lineAfterDisc });
 
       // Decrement stock
       const prev = product.currentStock;
@@ -90,7 +90,7 @@ router.post('/', validate(createSaleSchema), asyncHandler(async (req, res) => {
       await tx.stockMovement.create({ data: { productId: item.productId, userId, type: 'SALE_OUT', quantity: -item.quantity, balanceBefore: prev, balanceAfter: prev - item.quantity, referenceType: 'Sale' } });
     }
 
-    const totalAmount  = subtotal + gstAmount - discountAmount;
+    const totalAmount  = subtotal - discountAmount;
     const changeAmount = Math.max(0, actualPaid - totalAmount);
     const dueAmount    = Math.max(0, totalAmount - actualPaid);
     const invoiceNumber = await generateInvoiceNumber();

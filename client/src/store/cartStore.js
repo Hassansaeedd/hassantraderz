@@ -3,10 +3,10 @@ import { create } from 'zustand';
 
 const calcLine = (item) => {
   const base     = item.unitPrice * item.quantity;
-  const discAmt  = base * (item.discountPct / 100);
+  const discAmt  = base * ((item.discountPct || 0) / 100);
   const afterDis = base - discAmt;
-  const gstAmt   = afterDis * (item.gstRate / 100);
-  return { ...item, discountAmt: discAmt, gstAmt, lineTotal: afterDis + gstAmt };
+  const gstAmt   = 0;
+  return { ...item, discountAmt: discAmt, gstAmt: 0, lineTotal: afterDis };
 };
 
 export const useCartStore = create((set, get) => ({
@@ -18,7 +18,7 @@ export const useCartStore = create((set, get) => ({
 
   // Computed
   subtotal:       () => get().items.reduce((s, i) => s + i.unitPrice * i.quantity - i.discountAmt, 0),
-  gstAmount:      () => get().items.reduce((s, i) => s + i.gstAmt, 0),
+  gstAmount:      () => 0,
   discountTotal:  () => get().items.reduce((s, i) => s + i.discountAmt, 0),
   totalAmount:    () => get().items.reduce((s, i) => s + i.lineTotal, 0),
   itemCount:      () => get().items.reduce((s, i) => s + i.quantity, 0),
@@ -38,9 +38,9 @@ export const useCartStore = create((set, get) => ({
         quantity,
         discountPct: 0,
         discountAmt: 0,
-        gstRate:     Number(product.gstRate || 17),
+        gstRate:     0,
         gstAmt:      0,
-        lineTotal:   0,
+        lineTotal:   Number(product.sellingPrice) * quantity,
         maxStock:    product.currentStock,
       });
       return { items: [...state.items, newItem] };

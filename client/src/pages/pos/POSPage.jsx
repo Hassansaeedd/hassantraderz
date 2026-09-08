@@ -221,17 +221,10 @@ export default function POSPage() {
       const finalY = doc.lastAutoTable.finalY + 4;
       doc.line(5, finalY, 75, finalY);
 
-      doc.setFontSize(8);
-      doc.text(`Subtotal:`, 5, finalY + 4);
-      doc.text(`Rs. ${Number(receiptSale.subtotal || 0).toLocaleString()}`, 75, finalY + 4, { align: 'right' });
-
-      doc.text(`GST (17%):`, 5, finalY + 8);
-      doc.text(`Rs. ${Number(receiptSale.gstAmount || 0).toLocaleString()}`, 75, finalY + 8, { align: 'right' });
-
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text(`TOTAL:`, 5, finalY + 13);
-      doc.text(`Rs. ${Number(receiptSale.totalAmount || 0).toLocaleString()}`, 75, finalY + 13, { align: 'right' });
+      doc.text(`TOTAL:`, 5, finalY + 5);
+      doc.text(`Rs. ${Number(receiptSale.totalAmount || receiptSale.subtotal || 0).toLocaleString()}`, 75, finalY + 5, { align: 'right' });
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -358,18 +351,13 @@ export default function POSPage() {
 
       {/* Billing Summary Box */}
       <div style={{ background: 'var(--bg-elevated)', padding: 12, borderRadius: 8, border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12.5 }}>
-          <span style={{ color: 'var(--text-muted)' }}>{t('pos.subtotal')}:</span>
-          <span style={{ fontWeight: 600, color: 'var(--text)' }}>{formatCurrency(cart.subtotal())}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
+          <span style={{ color: 'var(--text-muted)' }}>Items Count:</span>
+          <span style={{ fontWeight: 600, color: 'var(--text)' }}>{cart.itemCount()} items</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12.5 }}>
-          <span style={{ color: 'var(--text-muted)' }}>GST (17%):</span>
-          <span style={{ fontWeight: 600, color: 'var(--text)' }}>{formatCurrency(cart.gstAmount())}</span>
-        </div>
-        <Divider style={{ margin: '6px 0' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 800 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 900, paddingTop: 4, borderTop: '1px solid var(--border)' }}>
           <span style={{ color: 'var(--text)' }}>{t('pos.total')}:</span>
-          <span style={{ color: 'var(--primary)' }}>{formatCurrency(cart.totalAmount())}</span>
+          <span style={{ color: 'var(--primary)', fontSize: 18 }}>{formatCurrency(cart.totalAmount())}</span>
         </div>
       </div>
 
