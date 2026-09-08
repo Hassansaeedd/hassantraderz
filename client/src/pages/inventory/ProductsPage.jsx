@@ -106,16 +106,19 @@ export default function ProductsPage() {
   // CSV Import Handler
   const handleDownloadSampleCSV = () => {
     const csvContent = `nameEn,nameUr,sku,barcode,purchasePrice,sellingPrice,currentStock,minStockLevel
-Samsung Galaxy A15,سیمسنگ A15,MOB-A15-01,88060900011,38000,45000,10,3
-Redmi 13C,ریڈمی 13C,MOB-R13C-02,69418100022,26000,31999,15,4
-Airpods Pro Wireless,ایئرپاڈز پرو,ACC-APP-03,19594900033,4500,6500,20,5
-Fast Charger 65W,فاسٹ چارجر,ACC-FC65-04,69218000044,1200,2200,30,5`;
+Type-C Charger (Model: G205),ٹائپ سی چارجر G205,CHG-G205-TC,89010020501,550,800,10,3
+Pin Charger 8600 (Model: G-205),پن چارجر 8600 ماڈل G-205,CHG-G205-8600,89010020502,500,700,10,3
+Pin Charger 8600 (Model: HM-1),پن چارجر 8600 ماڈل HM-1,CHG-HM1-8600,89010000103,600,850,10,3
+Wifi Charger (Model: Full Auto),وائی فائی چارجر فل آٹو,CHG-WIFI-FA,89010000004,450,650,10,3
+iPhone Cable (Model: C-14),آئی فون کیبل C-14,CAB-IP-C14,89010001405,200,350,7,2
+iPhone Cable (Model: V-261),آئی فون کیبل V-261,CAB-IP-V261,89010026106,180,300,10,3
+30W Fast Adapter (Model: Google),30 واٹ گوگل فاسٹ اڈاپٹر,ADP-30W-GOOG,89010003007,850,1200,3,1`;
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'Hassan_Traderz_Sample_Inventory.csv');
+    link.setAttribute('download', 'Hassan_Traderz_Inventory.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

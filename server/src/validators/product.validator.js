@@ -12,7 +12,7 @@ export const createProductSchema = z.object({
   brandId:       z.string().cuid('Invalid brand').optional().nullable(),
   purchasePrice: z.number().positive('Purchase price must be positive'),
   sellingPrice:  z.number().positive('Selling price must be positive'),
-  gstRate:       z.number().min(0).max(100).default(17),
+  gstRate:       z.number().min(0).max(100).default(0),
   gstInclusive:  z.boolean().default(false),
   currentStock:  z.number().int().min(0).default(0),
   minStockLevel: z.number().int().min(0).default(5),

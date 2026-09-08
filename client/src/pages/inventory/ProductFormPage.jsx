@@ -65,12 +65,13 @@ export default function ProductFormPage() {
   const onFinish = async (values) => {
     setSubmitting(true);
     try {
+      const payload = { ...values, gstRate: 0, gstInclusive: false };
       let productId = id;
       if (isEdit) {
-        await api.put(`/products/${id}`, values);
+        await api.put(`/products/${id}`, payload);
         message.success('Product updated successfully');
       } else {
-        const res = await api.post('/products', values);
+        const res = await api.post('/products', payload);
         productId = res.data.id;
         message.success('Product created successfully');
       }
@@ -153,22 +154,17 @@ export default function ProductFormPage() {
             </Col>
           </Row>
 
-          <Divider style={{ borderColor: 'var(--border)' }}>Pricing & Tax (Pakistan GST)</Divider>
+          <Divider style={{ borderColor: 'var(--border)' }}>Pricing Details (قیمت کی تفصیلات)</Divider>
 
           <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Form.Item name="purchasePrice" label={t('products.purchasePrice')} rules={[{ required: true }]}>
-                <InputNumber size="large" style={{ width: '100%' }} prefix="₨" min={0} />
+            <Col xs={24} sm={12}>
+              <Form.Item name="purchasePrice" label={t('products.purchasePrice')} rules={[{ required: true, message: 'Please enter purchase price' }]}>
+                <InputNumber size="large" style={{ width: '100%' }} prefix="₨" min={0} placeholder="Cost Price" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="sellingPrice" label={t('products.sellingPrice')} rules={[{ required: true }]}>
-                <InputNumber size="large" style={{ width: '100%' }} prefix="₨" min={0} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item name="gstRate" label="GST Rate (%)" rules={[{ required: true }]}>
-                <InputNumber size="large" style={{ width: '100%' }} suffix="%" min={0} max={100} />
+            <Col xs={24} sm={12}>
+              <Form.Item name="sellingPrice" label={t('products.sellingPrice')} rules={[{ required: true, message: 'Please enter sale price' }]}>
+                <InputNumber size="large" style={{ width: '100%' }} prefix="₨" min={0} placeholder="Retail Selling Price" />
               </Form.Item>
             </Col>
           </Row>
