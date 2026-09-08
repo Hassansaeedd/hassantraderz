@@ -199,6 +199,24 @@ router.put('/:id', managerOrAdmin, validate(updateProductSchema), asyncHandler(a
   return apiRes.success(res, product, 'Product updated');
 }));
 
+// DELETE /products/bulk-delete-all — Delete all products at once
+router.delete('/bulk-delete-all', managerOrAdmin, asyncHandler(async (req, res) => {
+  try {
+    await prisma.$transaction([
+      prisma.stockMovement.deleteMany({}),
+      prisma.productVariant.deleteMany({}),
+      prisma.saleItem.deleteMany({}),
+      prisma.purchaseItem.deleteMany({}),
+      prisma.product.deleteMany({}),
+    ]);
+    return apiRes.success(res, null, 'All products have been permanently deleted from inventory');
+  } catch (err) {
+    // Fallback to soft deleting all products if foreign key constraints exist
+    await prisma.product.updateMany({ data: { isActive: false, currentStock: 0 } });
+    return apiRes.success(res, null, 'All products have been cleared from inventory');
+  }
+}));
+
 // DELETE /products/:id (soft delete)
 router.delete('/:id', managerOrAdmin, asyncHandler(async (req, res) => {
   await prisma.product.update({ where: { id: req.params.id }, data: { isActive: false } });

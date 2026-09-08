@@ -30,7 +30,7 @@ export default function ProductFormPage() {
     fetchCategories();
     fetchBrands();
     if (isEdit) fetchProduct();
-    else form.setFieldsValue({ sku: generateSKU('MOB'), gstRate: 17, minStockLevel: 5 });
+    else form.setFieldsValue({ sku: generateSKU('MOB'), gstRate: 0, currentStock: 10, minStockLevel: 3 });
   }, [id]);
 
   const fetchCategories = async () => {
@@ -50,7 +50,9 @@ export default function ProductFormPage() {
         ...p,
         purchasePrice: Number(p.purchasePrice),
         sellingPrice: Number(p.sellingPrice),
-        gstRate: Number(p.gstRate),
+        currentStock: Number(p.currentStock || 0),
+        minStockLevel: Number(p.minStockLevel || 5),
+        gstRate: Number(p.gstRate || 0),
       });
       if (p.image) setFileList([{ uid: '-1', name: 'current_image.png', status: 'done', url: p.image }]);
     } catch (err) {
@@ -171,13 +173,33 @@ export default function ProductFormPage() {
             </Col>
           </Row>
 
+          <Divider style={{ borderColor: 'var(--border)' }}>Inventory & Stock Quantity (اسٹاک کی تفصیلات)</Divider>
+
           <Row gutter={16}>
             <Col xs={24} sm={12}>
-              <Form.Item name="minStockLevel" label={t('products.minStock')}>
-                <InputNumber size="large" style={{ width: '100%' }} min={0} />
+              <Form.Item
+                name="currentStock"
+                label={<span style={{ fontWeight: 700 }}>Available Stock / In-Hand Quantity (موجودہ اسٹاک)</span>}
+                rules={[{ required: true, message: 'Please enter available stock quantity' }]}
+                tooltip="The actual physical quantity of this product currently available in your shop"
+              >
+                <InputNumber size="large" style={{ width: '100%' }} min={0} placeholder="e.g. 10" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
+              <Form.Item
+                name="minStockLevel"
+                label={<span style={{ fontWeight: 700 }}>Low Stock Alert Threshold (کم از کم الرٹ)</span>}
+                rules={[{ required: true, message: 'Please enter low stock threshold' }]}
+                tooltip="The system will alert you when stock falls to or below this quantity"
+              >
+                <InputNumber size="large" style={{ width: '100%' }} min={0} placeholder="e.g. 3" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24}>
               <Form.Item label={t('products.image')}>
                 <Upload
                   fileList={fileList}
@@ -186,17 +208,17 @@ export default function ProductFormPage() {
                   maxCount={1}
                   listType="picture"
                 >
-                  <Button icon={<UploadOutlined />}>Select Image (JPEG/PNG)</Button>
+                  <Button icon={<UploadOutlined />}>Select Product Image (JPEG/PNG)</Button>
                 </Upload>
               </Form.Item>
             </Col>
           </Row>
 
           <Space style={{ marginTop: 16 }}>
-            <Button type="primary" htmlType="submit" size="large" loading={submitting}>
-              {isEdit ? 'Update Product' : 'Create Product'}
+            <Button type="primary" htmlType="submit" size="large" loading={submitting} style={{ fontWeight: 700, borderRadius: 8 }}>
+              {isEdit ? 'Update Product' : 'Save & Add Product'}
             </Button>
-            <Button size="large" onClick={() => navigate('/products')}>
+            <Button size="large" onClick={() => navigate('/products')} style={{ borderRadius: 8 }}>
               Cancel
             </Button>
           </Space>

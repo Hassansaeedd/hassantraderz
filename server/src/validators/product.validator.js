@@ -14,6 +14,7 @@ export const createProductSchema = z.object({
   sellingPrice:  z.number().positive('Selling price must be positive'),
   gstRate:       z.number().min(0).max(100).default(17),
   gstInclusive:  z.boolean().default(false),
+  currentStock:  z.number().int().min(0).default(0),
   minStockLevel: z.number().int().min(0).default(5),
 });
 

@@ -90,6 +90,19 @@ export default function ProductsPage() {
     }
   };
 
+  const handleDeleteAllProducts = async () => {
+    setLoading(true);
+    try {
+      await api.delete('/products/bulk-delete-all');
+      message.success('All products have been deleted from inventory!');
+      fetchProducts(1, pagination.pageSize);
+    } catch (err) {
+      message.error(err?.message || 'Failed to delete all products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // CSV Import Handler
   const handleDownloadSampleCSV = () => {
     const csvContent = `nameEn,nameUr,sku,barcode,purchasePrice,sellingPrice,currentStock,minStockLevel
@@ -246,7 +259,23 @@ Fast Charger 65W,فاسٹ چارجر,ACC-FC65-04,69218000044,1200,2200,30,5`;
           </Text>
         </div>
 
-        <Space style={{ marginTop: 10 }}>
+        <Space style={{ marginTop: 10 }} wrap>
+          <Popconfirm
+            title="Delete ALL Products from Inventory?"
+            description="Are you sure? This will wipe all current products from your shop inventory so you can upload fresh products via CSV."
+            onConfirm={handleDeleteAllProducts}
+            okText="Yes, Delete All"
+            cancelText="Cancel"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              style={{ fontWeight: 700, borderRadius: 8 }}
+            >
+              Delete All Products
+            </Button>
+          </Popconfirm>
           <Button
             icon={<FileExcelOutlined style={{ color: '#10b981' }} />}
             onClick={() => setCsvModalVisible(true)}
