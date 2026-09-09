@@ -21,6 +21,7 @@ import RepairsPage from '../pages/repairs/RepairsPage';
 import TradeInPage from '../pages/tradein/TradeInPage';
 import KhataPage from '../pages/khata/KhataPage';
 import ExpensesPage from '../pages/expenses/ExpensesPage';
+import LicenseManagementPage from '../pages/admin/LicenseManagementPage';
 import SuperAdminDashboard from '../pages/admin/SuperAdminDashboard';
 import NotFoundPage from '../pages/NotFoundPage';
 import { useAuthStore } from '../store/authStore';
