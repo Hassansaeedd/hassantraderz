@@ -147,7 +147,7 @@ export default function AppLayout() {
 
             {isMobile && (
               <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', letterSpacing: -0.2 }}>
-                Hassan Traderz
+                PrimeCell POS
               </span>
             )}
           </div>

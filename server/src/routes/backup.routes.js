@@ -65,7 +65,7 @@ router.get('/export-json', adminOnly, asyncHandler(async (req, res) => {
   ]);
 
   const backupData = {
-    software: 'Hassan Traderz POS',
+    software: 'PrimeCell POS',
     version: '2.4.0',
     backupDate: new Date().toISOString(),
     databaseType: 'PostgreSQL / Neon DB',

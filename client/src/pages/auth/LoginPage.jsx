@@ -111,12 +111,12 @@ export default function LoginPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <img
                   src="/logo.png"
-                  alt="Hassan Traderz Logo"
+                  alt="PrimeCell POS Logo"
                   style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }}
                 />
                 <div>
                   <h1 style={{ fontSize: 17.5, fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', margin: 0 }}>
-                    Hassan Traderz
+                    PrimeCell POS
                   </h1>
                   <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 11.5 }}>
                     Enterprise POS Suite v2.4
@@ -195,7 +195,7 @@ export default function LoginPage() {
           {/* Footer Note */}
           <div style={{ marginTop: 24, paddingTop: 14, borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11.5, color: isDark ? '#64748b' : '#94a3b8' }}>
-              Hassan Traderz Commercial Edition
+              PrimeCell POS Commercial Edition
             </span>
             <span style={{ fontSize: 11.5, color: '#10b981', fontWeight: 600 }}>
               ● Secure Platform
@@ -246,7 +246,7 @@ export default function LoginPage() {
                 Mobile Phones, Accessories & Repair POS
               </div>
               <div style={{ fontSize: 11.5, color: '#cbd5e1', opacity: 0.9 }}>
-                Hassan Traderz Enterprise Retail Software
+                PrimeCell POS Enterprise Retail Software
               </div>
             </div>
           </div>

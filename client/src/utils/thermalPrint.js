@@ -44,8 +44,8 @@ export const buildReceiptHTML = (sale, settings, language = 'en') => {
       </style>
     </head>
     <body>
-      <div class="center bold large">${settings.shop_name || 'Hassan Traderz'}</div>
-      <div class="center">${isUrdu ? 'حسن ٹریڈرز' : ''}</div>
+      <div class="center bold large">${settings.shop_name || 'PrimeCell POS'}</div>
+      <div class="center">${isUrdu ? 'پرائم سیل POS' : ''}</div>
       <div class="center">${settings.shop_address || 'Main Bazaar, Lahore'}</div>
       <div class="center">${settings.shop_phone || '+92-300-0000000'}</div>
       ${settings.ntn ? `<div class="center">NTN: ${settings.ntn}</div>` : ''}
@@ -77,7 +77,7 @@ export const buildReceiptHTML = (sale, settings, language = 'en') => {
         ${sale.changeAmount > 0 ? `<tr><td>${isUrdu ? 'واپسی' : 'Change'}</td><td class="right">${fmt(sale.changeAmount)}</td></tr>` : ''}
       </table>
       <div class="divider"></div>
-      <div class="footer">${isUrdu ? 'حسن ٹریڈرز سے خریداری کا شکریہ!' : 'Thank you for shopping at Hassan Traderz!'}</div>
+      <div class="footer">${isUrdu ? 'پرائم سیل POS سے خریداری کا شکریہ!' : 'Thank you for shopping at PrimeCell POS!'}</div>
       <div class="footer">${isUrdu ? 'رسید کے ساتھ 7 دن میں تبادلہ' : 'Exchange within 7 days with receipt'}</div>
     </body>
     </html>
@@ -85,7 +85,7 @@ export const buildReceiptHTML = (sale, settings, language = 'en') => {
 };
 
 export const printReceiptHTML = (sale, settings = {}, language = 'en') => {
-  const defaultSettings = { shop_name: 'Hassan Traderz', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17, ...settings };
+  const defaultSettings = { shop_name: 'PrimeCell POS', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17, ...settings };
   const html   = buildReceiptHTML(sale, defaultSettings, language);
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:80mm;height:0;border:0;';

@@ -165,7 +165,7 @@ export default function SalesPage() {
           <Button size="small" icon={<PrinterOutlined />} onClick={async () => {
             const res = await api.get(`/sales/${r.id}`);
             const saleData = res.data || res;
-            const settings = { shop_name: 'Hassan Traderz', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17 };
+            const settings = { shop_name: 'PrimeCell POS', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17 };
             printReceiptHTML(saleData, settings, i18n.language);
           }} />
           {r.status === 'COMPLETED' && (

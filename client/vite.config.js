@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.png'],
       manifest: {
-        name: 'Hassan Traderz POS',
-        short_name: 'HassanPOS',
-        description: 'Hassan Traderz Point of Sale & Inventory Management System',
+        name: 'PrimeCell POS',
+        short_name: 'PrimeCell',
+        description: 'PrimeCell Point of Sale & Inventory Management System',
         theme_color: '#060913',
         background_color: '#060913',
         display: 'standalone',

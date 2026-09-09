@@ -186,7 +186,7 @@ export default function POSPage() {
       const doc = new jsPDF({ unit: 'mm', format: [80, 200] });
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text('HASSAN TRADERZ', 40, 10, { align: 'center' });
+      doc.text('PRIMECELL POS', 40, 10, { align: 'center' });
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -236,7 +236,7 @@ export default function POSPage() {
 
       doc.line(5, finalY + 24, 75, finalY + 24);
       doc.setFontSize(7);
-      doc.text('Thank you for shopping at Hassan Traderz!', 40, finalY + 28, { align: 'center' });
+      doc.text('Thank you for shopping at PrimeCell POS!', 40, finalY + 28, { align: 'center' });
       doc.text('Goods once sold will not be returned without bill', 40, finalY + 31, { align: 'center' });
 
       doc.save(`Invoice_${receiptSale.invoiceNumber || 'INV'}.pdf`);
@@ -252,7 +252,7 @@ export default function POSPage() {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
 
     const lines = [
-      `*HASSAN TRADERZ - SALES RECEIPT*`,
+      `*PRIMECELL POS - SALES RECEIPT*`,
       `Invoice #: ${receiptSale.invoiceNumber}`,
       `Date: ${new Date(receiptSale.saleDate || Date.now()).toLocaleDateString()}`,
       `Customer: ${receiptSale.customer?.name || 'Walk-in Customer'}`,
@@ -711,7 +711,7 @@ export default function POSPage() {
             type="primary"
             icon={<PrinterOutlined />}
             onClick={() => {
-              const settings = { shop_name: 'Hassan Traderz', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17 };
+              const settings = { shop_name: 'PrimeCell POS', shop_address: 'Main Bazaar, Lahore', shop_phone: '+92-300-0000000', gst_rate: 17 };
               printReceiptHTML(receiptSale, settings, i18n.language);
             }}
             style={{ fontWeight: 700 }}
@@ -722,7 +722,7 @@ export default function POSPage() {
       >
         {receiptSale && (
           <div style={{ background: '#fff', color: '#000', padding: 16, fontFamily: 'monospace', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16, color: '#0f172a' }}>HASSAN TRADERZ</div>
+            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16, color: '#0f172a' }}>PRIMECELL POS</div>
             <div style={{ textAlign: 'center', fontSize: 11, color: '#475569' }}>Mobile Phones & Accessories House</div>
             <div style={{ textAlign: 'center', fontSize: 10.5, color: '#64748b' }}>Main Bazaar, Lahore | Ph: 0300-0000000</div>
             <Divider style={{ margin: '8px 0', borderColor: '#cbd5e1' }} />

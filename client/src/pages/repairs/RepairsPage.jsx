@@ -337,7 +337,7 @@ export default function RepairsPage() {
       >
         {selectedTicket && (
           <div style={{ background: '#fff', color: '#000', padding: 16, fontFamily: 'monospace', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>HASSAN TRADERZ REPAIR LAB</div>
+            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>PRIMECELL POS REPAIR LAB</div>
             <div style={{ textAlign: 'center', fontSize: 11, color: '#64748b' }}>Main Bazaar, Lahore | Ph: 0300-0000000</div>
             <Divider style={{ margin: '8px 0' }} />
             <div><b>Claim Tag #:</b> {selectedTicket.ticketNo}</div>

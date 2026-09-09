@@ -107,8 +107,8 @@ export default function KhataPage() {
       </head>
       <body>
         <div class="header">
-          <div class="title">HASSAN TRADERZ — CUSTOMER KHATA STATEMENT</div>
-          <div>حسن ٹریڈرز - گاہک کھاتہ سٹیٹمنٹ</div>
+          <div class="title">PRIMECELL POS — CUSTOMER KHATA STATEMENT</div>
+          <div>پرائم سیل POS - گاہک کھاتہ سٹیٹمنٹ</div>
         </div>
 
         <div><b>Customer Name:</b> ${selectedCust.name}</div>

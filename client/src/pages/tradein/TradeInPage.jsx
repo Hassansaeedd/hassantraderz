@@ -96,7 +96,7 @@ export default function TradeInPage() {
       </head>
       <body>
         <div class="header">
-          <div class="title">HASSAN TRADERZ — USED MOBILE BUYBACK AGREEMENT</div>
+          <div class="title">PRIMECELL POS — USED MOBILE BUYBACK AGREEMENT</div>
           <div class="subtitle">Police Verification & Seller Ownership Declaration (فروخت کنندہ کا بیان حلفی)</div>
         </div>
 

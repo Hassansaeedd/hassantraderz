@@ -186,7 +186,7 @@ router.post('/activate', authMiddleware, asyncHandler(async (req, res) => {
   const license = await prisma.license.findUnique({ where: { licenseKey: keyClean } });
 
   if (!license) {
-    return apiRes.badRequest(res, 'Invalid License Key. Please check the code or contact Hassan Traderz support.');
+    return apiRes.badRequest(res, 'Invalid License Key. Please check the code or contact PrimeCell POS support.');
   }
 
   if (license.status === 'REVOKED') {

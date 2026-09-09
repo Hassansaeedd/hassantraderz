@@ -86,7 +86,7 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/logo.png"
-            alt="Hassan Traderz Logo"
+            alt="PrimeCell POS Logo"
             style={{
               width: collapsed ? 34 : 38,
               height: collapsed ? 34 : 38,
@@ -99,7 +99,7 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
           {!collapsed && (
             <div>
               <div style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--text)', lineHeight: 1.2, letterSpacing: -0.2 }}>
-                {i18n.language === 'ur' ? 'حسن ٹریڈرز' : 'Hassan Traderz'}
+                {i18n.language === 'ur' ? 'پرائم سیل POS' : 'PrimeCell POS'}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
                 POS Suite v2.4

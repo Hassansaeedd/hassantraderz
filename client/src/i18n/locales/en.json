@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Hassan Traderz",
+    "name": "PrimeCell POS",
     "tagline": "Mobile Shop POS & Inventory Management System"
   },
   "nav": {
@@ -23,7 +23,7 @@
     "logout": "Logout",
     "username": "Username",
     "password": "Password",
-    "loginTitle": "Hassan Traderz",
+    "loginTitle": "PrimeCell POS",
     "loginSubtitle": "Mobile & Tech POS Management System",
     "loginButton": "Sign In to POS",
     "loggingIn": "Signing in...",
@@ -225,7 +225,7 @@
     "total": "TOTAL",
     "paid": "Paid",
     "change": "Change",
-    "thankYou": "Thank you for shopping at Hassan Traderz!",
+    "thankYou": "Thank you for shopping at PrimeCell POS!",
     "returnPolicy": "Exchange within 7 days with receipt"
   }
 }
