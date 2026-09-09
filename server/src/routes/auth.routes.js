@@ -7,8 +7,16 @@ import { loginSchema, changePasswordSchema } from '../validators/auth.validator.
 
 const router = Router();
 
+const superAdminOnly = (req, res, next) => {
+  const isSuper = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
+  if (!isSuper) {
+    return res.status(403).json({ success: false, message: 'Public registration is closed. Please contact Super Admin to create your shop account.' });
+  }
+  next();
+};
+
 router.post('/login',           validate(loginSchema),          authController.login);
-router.post('/register',                                        authController.register);
+router.post('/register',        authMiddleware, superAdminOnly, authController.register);
 router.post('/refresh',                                         authController.refresh);
 router.post('/logout',          authMiddleware,                 authController.logout);
 router.get('/me',               authMiddleware,                 authController.me);

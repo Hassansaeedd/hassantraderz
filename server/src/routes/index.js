@@ -17,6 +17,7 @@ import tradeinRoutes from './tradein.routes.js';
 import expenseRoutes from './expense.routes.js';
 import backupRoutes from './backup.routes.js';
 import licenseRoutes from './license.routes.js';
+import adminRoutes from './admin.routes.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ const router = Router();
 router.use('/auth', authRoutes);
 
 // Protected Core Operations
+router.use('/admin',      adminRoutes);
 router.use('/users',      userRoutes);
 router.use('/licenses',   licenseRoutes);
 router.use('/categories', categoryRoutes);

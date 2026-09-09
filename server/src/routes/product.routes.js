@@ -16,53 +16,28 @@ router.use(authMiddleware);
 router.get('/', asyncHandler(async (req, res) => {
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const { search, categoryId, brandId, lowStock } = req.query;
+  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
 
-  const where = { isActive: true };
+  const where = {
+    isActive: true,
+    ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+  };
+
   if (search) {
-    where.OR = [
-      { nameEn: { contains: search, mode: 'insensitive' } },
-      { nameUr: { contains: search, mode: 'insensitive' } },
-      { sku: { contains: search, mode: 'insensitive' } },
-      { barcode: { contains: search, mode: 'insensitive' } },
+    where.AND = [
+      {
+        OR: [
+          { nameEn: { contains: search, mode: 'insensitive' } },
+          { nameUr: { contains: search, mode: 'insensitive' } },
+          { sku: { contains: search, mode: 'insensitive' } },
+          { barcode: { contains: search, mode: 'insensitive' } },
+        ],
+      },
     ];
   }
 
   if (categoryId) {
-    const cat = await prisma.category.findUnique({ where: { id: categoryId } });
-    if (cat) {
-      const catLower = cat.nameEn.toLowerCase();
-      if (catLower.includes('access') || catLower.includes('charger') || catLower.includes('cable') || catLower.includes('ear') || catLower.includes('case') || catLower.includes('cover') || catLower.includes('power')) {
-        where.OR = [
-          { categoryId: categoryId },
-          { sku: { startsWith: 'ACC', mode: 'insensitive' } },
-          { sku: { startsWith: 'REP', mode: 'insensitive' } },
-          { nameEn: { contains: 'AirPod', mode: 'insensitive' } },
-          { nameEn: { contains: 'Earbud', mode: 'insensitive' } },
-          { nameEn: { contains: 'Charger', mode: 'insensitive' } },
-          { nameEn: { contains: 'Cable', mode: 'insensitive' } },
-          { nameEn: { contains: 'Power Bank', mode: 'insensitive' } },
-          { nameEn: { contains: 'Adapter', mode: 'insensitive' } },
-          { nameEn: { contains: 'Battery', mode: 'insensitive' } },
-          { nameEn: { contains: 'Case', mode: 'insensitive' } },
-          { nameEn: { contains: 'Cover', mode: 'insensitive' } },
-          { nameEn: { contains: 'Headset', mode: 'insensitive' } },
-          { nameEn: { contains: 'Speaker', mode: 'insensitive' } },
-          { nameEn: { contains: 'Glue', mode: 'insensitive' } },
-        ];
-      } else if (catLower.includes('smart') || catLower.includes('phone')) {
-        where.OR = [
-          { categoryId: categoryId },
-          { sku: { startsWith: 'MOB', mode: 'insensitive' } },
-          { nameEn: { contains: 'Galaxy', mode: 'insensitive' } },
-          { nameEn: { contains: 'iPhone', mode: 'insensitive' } },
-          { nameEn: { contains: 'Redmi', mode: 'insensitive' } },
-        ];
-      } else {
-        where.categoryId = categoryId;
-      }
-    } else {
-      where.categoryId = categoryId;
-    }
+    where.categoryId = categoryId;
   }
 
   if (brandId) where.brandId = brandId;
@@ -80,8 +55,12 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // GET /products/low-stock
 router.get('/low-stock', asyncHandler(async (req, res) => {
+  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
   const products = await prisma.product.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+    },
     orderBy: { currentStock: 'asc' },
     take: 50,
   });
@@ -93,9 +72,12 @@ router.get('/low-stock', asyncHandler(async (req, res) => {
 router.get('/search', asyncHandler(async (req, res) => {
   const q = req.query.q?.trim();
   if (!q) return apiRes.success(res, []);
+  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
+
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
+      ...(isSuperAdmin ? {} : { userId: req.user.userId }),
       OR: [
         { nameEn: { contains: q } },
         { nameUr: { contains: q } },
@@ -115,6 +97,7 @@ router.post('/bulk-csv', managerOrAdmin, asyncHandler(async (req, res) => {
   if (!Array.isArray(items) || items.length === 0) {
     return apiRes.badRequest(res, 'Invalid or empty items list');
   }
+  const userId = req.user.userId;
 
   // Fetch or create default category
   let defaultCategory = await prisma.category.findFirst();
@@ -126,16 +109,18 @@ router.post('/bulk-csv', managerOrAdmin, asyncHandler(async (req, res) => {
   for (const item of items) {
     if (!item.nameEn || !item.sellingPrice) continue;
 
-    const sku = item.sku || `SKU-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+    const baseSku = item.sku || `SKU-${Date.now()}-${Math.floor(Math.random()*1000)}`;
     const barcode = item.barcode || null;
 
-    // Skip if existing SKU or Barcode
+    // Check existing for this shop
     const existing = await prisma.product.findFirst({
-      where: { OR: [{ sku }, ...(barcode ? [{ barcode }] : [])] },
+      where: {
+        userId,
+        OR: [{ sku: baseSku }, ...(barcode ? [{ barcode }] : [])],
+      },
     });
 
     if (existing) {
-      // Update stock
       await prisma.product.update({
         where: { id: existing.id },
         data: {
@@ -146,17 +131,24 @@ router.post('/bulk-csv', managerOrAdmin, asyncHandler(async (req, res) => {
       });
       createdCount++;
     } else {
+      let finalSku = baseSku;
+      const globalConflict = await prisma.product.findUnique({ where: { sku: finalSku } });
+      if (globalConflict && globalConflict.userId !== userId) {
+        finalSku = `${baseSku}-${userId.substring(userId.length - 4)}`;
+      }
+
       await prisma.product.create({
         data: {
           nameEn: item.nameEn,
           nameUr: item.nameUr || null,
-          sku,
+          sku: finalSku,
           barcode,
           categoryId: item.categoryId || defaultCategory.id,
           purchasePrice: Number(item.purchasePrice || item.sellingPrice * 0.8),
           sellingPrice: Number(item.sellingPrice),
-          minStockLevel: Number(item.minStockLevel || 5),
+          minStockLevel: Number(item.minStockLevel || 3),
           currentStock: Number(item.currentStock || 0),
+          userId,
         },
       });
       createdCount++;
@@ -181,7 +173,20 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 // POST /products
 router.post('/', managerOrAdmin, validate(createProductSchema), asyncHandler(async (req, res) => {
-  const product = await prisma.product.create({ data: req.validatedBody, include: { category: true, brand: true } });
+  const userId = req.user.userId;
+  let finalSku = req.validatedBody.sku;
+  const existing = await prisma.product.findUnique({ where: { sku: finalSku } });
+  if (existing) {
+    if (existing.userId === userId) {
+      return apiRes.badRequest(res, 'A product with this SKU already exists in your inventory');
+    }
+    finalSku = `${finalSku}-${userId.substring(userId.length - 4)}`;
+  }
+
+  const product = await prisma.product.create({
+    data: { ...req.validatedBody, sku: finalSku, userId },
+    include: { category: true, brand: true }
+  });
   return apiRes.created(res, product, 'Product created');
 }));
 
@@ -199,20 +204,28 @@ router.put('/:id', managerOrAdmin, validate(updateProductSchema), asyncHandler(a
   return apiRes.success(res, product, 'Product updated');
 }));
 
-// DELETE /products/bulk-delete-all — Delete all products at once
+// DELETE /products/bulk-delete-all — Delete all products of THIS shop only
 router.delete('/bulk-delete-all', managerOrAdmin, asyncHandler(async (req, res) => {
+  const userId = req.user.userId;
   try {
-    await prisma.$transaction([
-      prisma.stockMovement.deleteMany({}),
-      prisma.productVariant.deleteMany({}),
-      prisma.saleItem.deleteMany({}),
-      prisma.purchaseItem.deleteMany({}),
-      prisma.product.deleteMany({}),
-    ]);
+    const shopProducts = await prisma.product.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+    const productIds = shopProducts.map(p => p.id);
+
+    if (productIds.length > 0) {
+      await prisma.$transaction([
+        prisma.stockMovement.deleteMany({ where: { productId: { in: productIds } } }),
+        prisma.productVariant.deleteMany({ where: { productId: { in: productIds } } }),
+        prisma.saleItem.deleteMany({ where: { productId: { in: productIds } } }),
+        prisma.purchaseItem.deleteMany({ where: { productId: { in: productIds } } }),
+        prisma.product.deleteMany({ where: { id: { in: productIds } } }),
+      ]);
+    }
     return apiRes.success(res, null, 'All products have been permanently deleted from inventory');
   } catch (err) {
-    // Fallback to soft deleting all products if foreign key constraints exist
-    await prisma.product.updateMany({ data: { isActive: false, currentStock: 0 } });
+    await prisma.product.updateMany({ where: { userId }, data: { isActive: false, currentStock: 0 } });
     return apiRes.success(res, null, 'All products have been cleared from inventory');
   }
 }));

@@ -23,7 +23,16 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
   const isAdmin      = user?.role === 'ADMIN' || isSuperAdmin;
   const isManager    = ['ADMIN', 'MANAGER', 'SUPERADMIN'].includes(user?.role) || isSuperAdmin;
 
-  const menuItems = [
+  const superAdminMenuItems = [
+    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Super Admin Portal' },
+    { type: 'divider',   label: 'Platform Licensing' },
+    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses' },
+    { type: 'divider',   label: 'System Control' },
+    { key: '/users',     icon: <UserOutlined />,      label: 'System Users' },
+    { key: '/settings',  icon: <SettingOutlined />,   label: 'Settings & DB Backup' },
+  ];
+
+  const shopMenuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: t('nav.dashboard') },
     { key: '/pos',       icon: <ShoppingCartOutlined />, label: t('nav.pos'), highlight: true },
     { type: 'divider',   label: 'Core Operations' },
@@ -39,10 +48,10 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
     { key: '/suppliers', icon: <TruckOutlined />,      label: t('nav.suppliers') },
     { type: 'divider',   label: 'Management', hidden: !isManager },
     { key: '/reports',   icon: <BarChartOutlined />,  label: t('nav.reports'),  hidden: !isManager },
-    { key: '/users',     icon: <UserOutlined />,      label: t('nav.users'),    hidden: !isAdmin },
-    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses', hidden: !isSuperAdmin },
     { key: '/settings',  icon: <SettingOutlined />,   label: t('nav.settings'), hidden: !isAdmin },
   ].filter(item => !item.hidden);
+
+  const menuItems = isSuperAdmin ? superAdminMenuItems : shopMenuItems;
 
   const activeKey = '/' + location.pathname.split('/')[1];
 

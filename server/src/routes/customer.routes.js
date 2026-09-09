@@ -9,14 +9,24 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', asyncHandler(async (req, res) => {
+  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const search = req.query.search;
-  const where = { isActive: true };
-  if (search) where.OR = [
-    { name: { contains: search, mode: 'insensitive' } },
-    { phone: { contains: search } },
-    { email: { contains: search, mode: 'insensitive' } },
-  ];
+  const where = {
+    isActive: true,
+    ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+  };
+  if (search) {
+    where.AND = [
+      {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    ];
+  }
   const [customers, total] = await Promise.all([
     prisma.customer.findMany({ where, skip, take, orderBy: { name: 'asc' } }),
     prisma.customer.count({ where }),
@@ -34,7 +44,23 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 router.post('/', asyncHandler(async (req, res) => {
-  const customer = await prisma.customer.create({ data: req.body });
+  const userId = req.user.userId;
+  // If phone already exists in this shop, reject or update
+  if (req.body.phone) {
+    const existing = await prisma.customer.findFirst({
+      where: { phone: req.body.phone, userId, isActive: true },
+    });
+    if (existing) {
+      return apiRes.badRequest(res, 'A customer with this phone number already exists in your shop');
+    }
+  }
+
+  const customer = await prisma.customer.create({
+    data: {
+      ...req.body,
+      userId,
+    },
+  });
   return apiRes.created(res, customer, 'Customer created');
 }));
 

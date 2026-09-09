@@ -10,14 +10,24 @@ const router = Router();
 router.use(authMiddleware, managerOrAdmin);
 
 router.get('/', asyncHandler(async (req, res) => {
+  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const search = req.query.search;
-  const where = { isActive: true };
-  if (search) where.OR = [
-    { name: { contains: search, mode: 'insensitive' } },
-    { company: { contains: search, mode: 'insensitive' } },
-    { phone: { contains: search } },
-  ];
+  const where = {
+    isActive: true,
+    ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+  };
+  if (search) {
+    where.AND = [
+      {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { company: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search } },
+        ],
+      },
+    ];
+  }
   const [suppliers, total] = await Promise.all([
     prisma.supplier.findMany({ where, skip, take, orderBy: { name: 'asc' } }),
     prisma.supplier.count({ where }),
@@ -35,7 +45,12 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 router.post('/', asyncHandler(async (req, res) => {
-  const supplier = await prisma.supplier.create({ data: req.body });
+  const supplier = await prisma.supplier.create({
+    data: {
+      ...req.body,
+      userId: req.user.userId,
+    },
+  });
   return apiRes.created(res, supplier, 'Supplier created');
 }));
 

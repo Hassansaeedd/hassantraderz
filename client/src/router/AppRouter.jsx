@@ -21,21 +21,28 @@ import RepairsPage from '../pages/repairs/RepairsPage';
 import TradeInPage from '../pages/tradein/TradeInPage';
 import KhataPage from '../pages/khata/KhataPage';
 import ExpensesPage from '../pages/expenses/ExpensesPage';
-import LicenseManagementPage from '../pages/admin/LicenseManagementPage';
+import SuperAdminDashboard from '../pages/admin/SuperAdminDashboard';
 import NotFoundPage from '../pages/NotFoundPage';
+import { useAuthStore } from '../store/authStore';
 
 export default function AppRouter() {
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.username === 'Hassan@009' || user?.role === 'SUPERADMIN';
+
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Routes — Strict Sign In Only */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/register" element={<Navigate to="/login" replace />} />
 
       {/* Main Protected Workspace */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route
+            path="/dashboard"
+            element={isSuperAdmin ? <SuperAdminDashboard /> : <DashboardPage />}
+          />
           <Route path="/pos" element={<POSPage />} />
           
           {/* Industrial Mobile Shop Modules */}

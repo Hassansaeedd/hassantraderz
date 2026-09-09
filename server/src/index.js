@@ -99,34 +99,12 @@ app.use('*', (req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────
 app.use(globalErrorHandler);
 
-// ─── Ensure Super Admin User Exists (Hassan@009 / shopco@123) ──────────────
-import bcrypt from 'bcryptjs';
-import { prisma } from './config/database.js';
-
-async function bootstrapSuperAdmin() {
-  try {
-    const adminPassword = await bcrypt.hash('shopco@123', 12);
-    await prisma.user.upsert({
-      where: { username: 'Hassan@009' },
-      update: { passwordHash: adminPassword, role: 'ADMIN', status: 'ACTIVE' },
-      create: {
-        username: 'Hassan@009',
-        email: 'admin@hassantraderz.com',
-        passwordHash: adminPassword,
-        fullName: 'Hassan Saeed (Super Admin)',
-        role: 'ADMIN',
-        status: 'ACTIVE',
-      },
-    });
-    logger.info('Super Admin account ready (Hassan@009)');
-  } catch (err) {
-    logger.warn('Bootstrap admin check skipped: ' + err.message);
-  }
-}
+// ─── Initialize Tenant Data Isolation & Super Admin ─────────────────────────
+import { bootstrapTenants } from './bootstrapTenants.js';
 
 // ─── Start Server on 0.0.0.0 (Accessible across Local Wi-Fi Network) ────────
 app.listen(PORT, '0.0.0.0', () => {
-  bootstrapSuperAdmin();
+  bootstrapTenants();
   logger.info(`
   ╔══════════════════════════════════════════╗
   ║   Mobile Shop POS — API Server           ║

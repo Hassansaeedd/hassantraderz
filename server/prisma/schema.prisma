@@ -35,6 +35,9 @@ model User {
   tradeIns       TradeIn[]
   expenses       Expense[]
   licenses       License[]
+  products       Product[]
+  customers      Customer[]
+  suppliers      Supplier[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,6 +132,9 @@ model Product {
   purchaseItems  PurchaseItem[]
   stockMovements StockMovement[]
 
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -171,6 +177,9 @@ model Customer {
   repairs  RepairTicket[]
   tradeIns TradeIn[]
 
+  userId   String?
+  user     User?    @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -193,6 +202,9 @@ model Supplier {
   notes              String?
 
   purchases Purchase[]
+
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
