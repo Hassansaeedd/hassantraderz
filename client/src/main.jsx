@@ -1,7 +1,8 @@
-// client/src/main.jsx — Dynamic Professional Theme ConfigProvider
+// client/src/main.jsx — Dynamic Professional Theme & RTL ConfigProvider
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConfigProvider, theme as antdTheme } from 'antd';
+import { useTranslation } from 'react-i18next';
 import './i18n/index.js';
 import App from './App.jsx';
 import { useThemeStore } from './store/themeStore.js';
@@ -9,10 +10,14 @@ import './styles/global.css';
 
 function Main() {
   const mode = useThemeStore((s) => s.mode);
+  const { i18n } = useTranslation();
+  const isUrdu = i18n.language === 'ur';
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mode);
-  }, [mode]);
+    document.documentElement.dir = isUrdu ? 'rtl' : 'ltr';
+    document.documentElement.lang = isUrdu ? 'ur' : 'en';
+  }, [mode, isUrdu]);
 
   const isDark = mode === 'dark';
 
@@ -33,7 +38,7 @@ function Main() {
       colorError:          '#ef4444',
       colorInfo:           '#0284c7',
       borderRadius:        8,
-      fontFamily:          "'Plus Jakarta Sans', -apple-system, sans-serif",
+      fontFamily:          isUrdu ? "'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif" : "'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif",
       fontSize:            14,
       controlHeight:       38,
       boxShadow:           isDark ? '0 8px 24px rgba(0, 0, 0, 0.35)' : '0 4px 14px rgba(0, 0, 0, 0.05)',
@@ -88,7 +93,7 @@ function Main() {
   };
 
   return (
-    <ConfigProvider theme={themeConfig}>
+    <ConfigProvider theme={themeConfig} direction={isUrdu ? 'rtl' : 'ltr'}>
       <App />
     </ConfigProvider>
   );

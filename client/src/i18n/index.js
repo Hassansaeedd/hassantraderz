@@ -28,7 +28,7 @@ i18n.on('languageChanged', (lng) => {
   document.documentElement.dir  = lng === 'ur' ? 'rtl' : 'ltr';
   document.documentElement.lang = lng;
   document.documentElement.style.fontFamily =
-    lng === 'ur' ? "'Noto Nastaliq Urdu', serif" : "'Inter', sans-serif";
+    lng === 'ur' ? "'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif" : "'Inter', sans-serif";
 });
 
 export default i18n;

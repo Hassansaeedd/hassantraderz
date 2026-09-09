@@ -9,6 +9,7 @@ import {
   CheckCircleOutlined, StopOutlined, ReloadOutlined, CopyOutlined,
   SearchOutlined, SafetyCertificateOutlined, CalendarOutlined, PhoneOutlined
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import api from '../../api/axiosInstance';
 import { formatDateTime } from '../../utils/formatters';
 
@@ -16,6 +17,9 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 export default function SuperAdminDashboard() {
+  const { t, i18n } = useTranslation();
+  const isUrdu = i18n.language === 'ur';
+
   const [stats, setStats] = useState({
     totalShops: 0,
     activeLicenses: 0,
@@ -134,7 +138,7 @@ export default function SuperAdminDashboard() {
 
   const columns = [
     {
-      title: 'Client Shop & Owner',
+      title: isUrdu ? 'کلائنٹ شاپ اور مالک' : 'Client Shop & Owner',
       key: 'shopInfo',
       render: (_, r) => (
         <div>
@@ -142,18 +146,18 @@ export default function SuperAdminDashboard() {
             {r.license?.shopName || r.ownerName}
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            Owner: <b>{r.ownerName}</b>
+            {isUrdu ? 'مالک:' : 'Owner:'} <b>{r.ownerName}</b>
           </div>
         </div>
       ),
     },
     {
-      title: 'Credentials & Phone',
+      title: isUrdu ? 'یوزر اور رابطہ' : 'Credentials & Phone',
       key: 'credentials',
       render: (_, r) => (
         <div>
           <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 13 }}>
-            User: {r.username}
+            {isUrdu ? 'صارف:' : 'User:'} {r.username}
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             <PhoneOutlined style={{ marginRight: 4 }} />
@@ -163,7 +167,7 @@ export default function SuperAdminDashboard() {
       ),
     },
     {
-      title: 'License Duration',
+      title: isUrdu ? 'لائسنس پلان' : 'License Duration',
       key: 'licensePlan',
       render: (_, r) => {
         const d = r.license?.duration || '15_DAYS';
@@ -172,17 +176,21 @@ export default function SuperAdminDashboard() {
 
         return (
           <Tag color={isLife ? 'purple' : isTrial ? 'orange' : 'blue'} style={{ fontWeight: 700, padding: '3px 8px' }}>
-            {isLife ? '👑 LIFETIME' : isTrial ? '⏳ 15-Day Free Trial' : `🛡️ ${d.replace('_', ' ')}`}
+            {isLife
+              ? (isUrdu ? '👑 لائف ٹائم لائسنس' : '👑 LIFETIME')
+              : isTrial
+              ? (isUrdu ? '⏳ 15 دن فری ٹرائل' : '⏳ 15-Day Free Trial')
+              : `🛡️ ${d.replace('_', ' ')}`}
           </Tag>
         );
       },
     },
     {
-      title: 'Expiry Date',
+      title: isUrdu ? 'آخری تاریخ' : 'Expiry Date',
       key: 'expiry',
       render: (_, r) => {
         if (!r.license?.expiresAt || r.license?.duration === 'LIFETIME') {
-          return <Tag color="green">Never (Lifetime)</Tag>;
+          return <Tag color="green">{isUrdu ? 'دائمی (لائف ٹائم)' : 'Never (Lifetime)'}</Tag>;
         }
         const exp = new Date(r.license.expiresAt);
         const isPast = exp < new Date();
@@ -194,23 +202,23 @@ export default function SuperAdminDashboard() {
               {exp.toLocaleDateString()}
             </div>
             <div style={{ fontSize: 11, color: isPast ? '#ef4444' : 'var(--text-muted)' }}>
-              {isPast ? 'Expired' : `${diffDays} days left`}
+              {isPast ? (isUrdu ? 'ختم شدہ' : 'Expired') : (isUrdu ? `${diffDays} دن باقی` : `${diffDays} days left`)}
             </div>
           </div>
         );
       },
     },
     {
-      title: 'Status',
+      title: isUrdu ? 'حیثیت' : 'Status',
       key: 'status',
       render: (_, r) => (
         <Tag color={r.status === 'ACTIVE' ? 'success' : 'error'} style={{ fontWeight: 700 }}>
-          {r.status === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED'}
+          {r.status === 'ACTIVE' ? (isUrdu ? 'فعال' : 'ACTIVE') : (isUrdu ? 'معطل' : 'SUSPENDED')}
         </Tag>
       ),
     },
     {
-      title: 'License Key',
+      title: isUrdu ? 'لائسنس کی' : 'License Key',
       key: 'licenseKey',
       render: (_, r) => {
         const key = r.license?.licenseKey || 'N/A';
@@ -218,7 +226,7 @@ export default function SuperAdminDashboard() {
           <Space>
             <Text code style={{ fontSize: 11.5 }}>{key}</Text>
             {key !== 'N/A' && (
-              <Tooltip title="Copy License Key">
+              <Tooltip title={isUrdu ? 'لائسنس کی کاپی کریں' : 'Copy License Key'}>
                 <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => copyToClipboard(key)} />
               </Tooltip>
             )}
@@ -227,7 +235,7 @@ export default function SuperAdminDashboard() {
       },
     },
     {
-      title: 'Actions',
+      title: isUrdu ? 'کاروائیاں' : 'Actions',
       key: 'actions',
       render: (_, r) => (
         <Space>
@@ -241,21 +249,21 @@ export default function SuperAdminDashboard() {
             }}
             style={{ fontWeight: 600 }}
           >
-            Extend Key
+            {isUrdu ? 'لائسنس بڑھائیں' : 'Extend Key'}
           </Button>
 
           <Popconfirm
-            title={`Are you sure you want to ${r.status === 'ACTIVE' ? 'suspend' : 'activate'} this shop?`}
+            title={isUrdu ? `کیا آپ واقعی اس شاپ کو ${r.status === 'ACTIVE' ? 'معطل' : 'فعال'} کرنا چاہتے ہیں؟` : `Are you sure you want to ${r.status === 'ACTIVE' ? 'suspend' : 'activate'} this shop?`}
             onConfirm={() => handleToggleStatus(r)}
-            okText="Yes"
-            cancelText="No"
+            okText={isUrdu ? 'ہاں' : 'Yes'}
+            cancelText={isUrdu ? 'نہیں' : 'No'}
           >
             <Button
               size="small"
               danger={r.status === 'ACTIVE'}
               icon={r.status === 'ACTIVE' ? <StopOutlined /> : <CheckCircleOutlined />}
             >
-              {r.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+              {r.status === 'ACTIVE' ? (isUrdu ? 'معطل کریں' : 'Suspend') : (isUrdu ? 'بحال کریں' : 'Activate')}
             </Button>
           </Popconfirm>
         </Space>
@@ -269,17 +277,17 @@ export default function SuperAdminDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Title level={2} style={{ color: 'var(--text)', margin: 0, fontWeight: 900 }}>
-            <SafetyCertificateOutlined style={{ color: 'var(--primary)', marginRight: 10 }} />
-            Super Admin Portal
+            <SafetyCertificateOutlined style={{ color: 'var(--primary)', marginInlineEnd: 10 }} />
+            {isUrdu ? 'سپر ایڈمن پورٹل' : 'Super Admin Portal'}
           </Title>
           <Text style={{ color: 'var(--text-muted)', fontSize: 13.5 }}>
-            Master License Management, Client Shop Provisioning & Multi-Tenant Control
+            {isUrdu ? 'ماسٹر لائسنس مینجمنٹ، کلائنٹ شاپ پروویژننگ اور ملٹی ٹیننٹ کنٹرول' : 'Master License Management, Client Shop Provisioning & Multi-Tenant Control'}
           </Text>
         </div>
 
         <Space>
           <Button icon={<ReloadOutlined />} onClick={() => { fetchStats(); fetchShops(); }} size="large">
-            Refresh
+            {isUrdu ? 'ریفریش' : 'Refresh'}
           </Button>
           <Button
             type="primary"
@@ -288,7 +296,7 @@ export default function SuperAdminDashboard() {
             size="large"
             style={{ fontWeight: 800, borderRadius: 10, background: '#2563eb' }}
           >
-            + Register New Client Shop
+            {isUrdu ? '+ نیا کلائنٹ شاپ رجسٹر کریں' : '+ Register New Client Shop'}
           </Button>
         </Space>
       </div>
@@ -298,9 +306,9 @@ export default function SuperAdminDashboard() {
         <Col xs={12} sm={6}>
           <Card style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 12 }} bodyStyle={{ padding: 18 }}>
             <Statistic
-              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Registered Client Shops</span>}
+              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{isUrdu ? 'رجسٹرڈ کلائنٹ شاپس' : 'Registered Client Shops'}</span>}
               value={stats.totalShops}
-              prefix={<ShopOutlined style={{ color: '#3b82f6', marginRight: 8 }} />}
+              prefix={<ShopOutlined style={{ color: '#3b82f6', marginInlineEnd: 8 }} />}
               valueStyle={{ fontWeight: 900, color: 'var(--text)' }}
             />
           </Card>
@@ -308,9 +316,9 @@ export default function SuperAdminDashboard() {
         <Col xs={12} sm={6}>
           <Card style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 12 }} bodyStyle={{ padding: 18 }}>
             <Statistic
-              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Active Licenses</span>}
+              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{isUrdu ? 'ایکٹیو لائسنس' : 'Active Licenses'}</span>}
               value={stats.activeLicenses}
-              prefix={<CheckCircleOutlined style={{ color: '#10b981', marginRight: 8 }} />}
+              prefix={<CheckCircleOutlined style={{ color: '#10b981', marginInlineEnd: 8 }} />}
               valueStyle={{ fontWeight: 900, color: '#10b981' }}
             />
           </Card>
@@ -318,9 +326,9 @@ export default function SuperAdminDashboard() {
         <Col xs={12} sm={6}>
           <Card style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 12 }} bodyStyle={{ padding: 18 }}>
             <Statistic
-              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Free Trial Shops</span>}
+              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{isUrdu ? 'فری ٹرائل شاپس' : 'Free Trial Shops'}</span>}
               value={stats.trialLicenses}
-              prefix={<ClockCircleOutlined style={{ color: '#f59e0b', marginRight: 8 }} />}
+              prefix={<ClockCircleOutlined style={{ color: '#f59e0b', marginInlineEnd: 8 }} />}
               valueStyle={{ fontWeight: 900, color: '#f59e0b' }}
             />
           </Card>
@@ -328,9 +336,9 @@ export default function SuperAdminDashboard() {
         <Col xs={12} sm={6}>
           <Card style={{ background: 'var(--bg-container)', border: '1px solid var(--border)', borderRadius: 12 }} bodyStyle={{ padding: 18 }}>
             <Statistic
-              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Expiring in 7 Days</span>}
+              title={<span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{isUrdu ? '7 دن میں زائد المیعاد' : 'Expiring in 7 Days'}</span>}
               value={stats.expiringSoon}
-              prefix={<CalendarOutlined style={{ color: '#ef4444', marginRight: 8 }} />}
+              prefix={<CalendarOutlined style={{ color: '#ef4444', marginInlineEnd: 8 }} />}
               valueStyle={{ fontWeight: 900, color: '#ef4444' }}
             />
           </Card>
@@ -342,11 +350,11 @@ export default function SuperAdminDashboard() {
         title={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
             <span style={{ fontWeight: 800, fontSize: 16 }}>
-              Registered Mobile Shops Directory ({filteredShops.length})
+              {isUrdu ? 'رجسٹرڈ موبائل شاپس ڈائریکٹری' : 'Registered Mobile Shops Directory'} ({filteredShops.length})
             </span>
             <Input
               prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
-              placeholder="Search by shop name, owner, username..."
+              placeholder={isUrdu ? 'شاپ کا نام، مالک، یا یوزرنیم سے تلاش کریں...' : 'Search by shop name, owner, username...'}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: 300, borderRadius: 8 }}

@@ -23,30 +23,32 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
   const isAdmin      = user?.role === 'ADMIN' || isSuperAdmin;
   const isManager    = ['ADMIN', 'MANAGER', 'SUPERADMIN'].includes(user?.role) || isSuperAdmin;
 
+  const isUrdu = i18n.language === 'ur';
+
   const superAdminMenuItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Super Admin Portal' },
-    { type: 'divider',   label: 'Platform Licensing' },
-    { key: '/licenses',  icon: <KeyOutlined />,       label: 'Software Licenses' },
-    { type: 'divider',   label: 'System Control' },
-    { key: '/users',     icon: <UserOutlined />,      label: 'System Users' },
-    { key: '/settings',  icon: <SettingOutlined />,   label: 'Settings & DB Backup' },
+    { key: '/dashboard', icon: <DashboardOutlined />, label: isUrdu ? 'سپر ایڈمن پورٹل' : 'Super Admin Portal' },
+    { type: 'divider',   label: isUrdu ? 'پلیٹ فارم لائسنسنگ' : 'Platform Licensing' },
+    { key: '/licenses',  icon: <KeyOutlined />,       label: isUrdu ? 'سافٹ ویئر لائسنس' : 'Software Licenses' },
+    { type: 'divider',   label: isUrdu ? 'سسٹم کنٹرول' : 'System Control' },
+    { key: '/users',     icon: <UserOutlined />,      label: isUrdu ? 'سسٹم یوزرز' : 'System Users' },
+    { key: '/settings',  icon: <SettingOutlined />,   label: isUrdu ? 'سیٹنگز اور بیک اپ' : 'Settings & DB Backup' },
   ];
 
   const shopMenuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: t('nav.dashboard') },
     { key: '/pos',       icon: <ShoppingCartOutlined />, label: t('nav.pos'), highlight: true },
-    { type: 'divider',   label: 'Core Operations' },
-    { key: '/repairs',   icon: <ToolOutlined />,      label: 'Mobile Repairs' },
-    { key: '/trade-in',  icon: <SwapOutlined />,      label: 'Used Buyback' },
-    { key: '/khata',     icon: <BookOutlined />,      label: 'Customer Khata' },
-    { key: '/expenses',  icon: <AuditOutlined />,     label: 'Shop Expenses' },
+    { type: 'divider',   label: isUrdu ? 'بنیادی ماڈیولز' : 'Core Operations' },
+    { key: '/repairs',   icon: <ToolOutlined />,      label: isUrdu ? 'موبائل ریپیئرنگ' : 'Mobile Repairs' },
+    { key: '/trade-in',  icon: <SwapOutlined />,      label: isUrdu ? 'موبائل بائے بیک' : 'Used Buyback' },
+    { key: '/khata',     icon: <BookOutlined />,      label: isUrdu ? 'گاہک کھاتہ' : 'Customer Khata' },
+    { key: '/expenses',  icon: <AuditOutlined />,     label: isUrdu ? 'دکان کے اخراجات' : 'Shop Expenses' },
     { key: '/products',  icon: <AppstoreOutlined />,  label: t('nav.products') },
     { key: '/sales',     icon: <ShoppingOutlined />,  label: t('nav.sales') },
     { key: '/purchases', icon: <InboxOutlined />,     label: t('nav.purchases') },
-    { type: 'divider',   label: 'Directory' },
+    { type: 'divider',   label: isUrdu ? 'ڈائریکٹری' : 'Directory' },
     { key: '/customers', icon: <TeamOutlined />,      label: t('nav.customers') },
     { key: '/suppliers', icon: <TruckOutlined />,      label: t('nav.suppliers') },
-    { type: 'divider',   label: 'Management', hidden: !isManager },
+    { type: 'divider',   label: isUrdu ? 'انتظامیہ' : 'Management', hidden: !isManager },
     { key: '/reports',   icon: <BarChartOutlined />,  label: t('nav.reports'),  hidden: !isManager },
     { key: '/settings',  icon: <SettingOutlined />,   label: t('nav.settings'), hidden: !isAdmin },
   ].filter(item => !item.hidden);
@@ -69,7 +71,7 @@ export default function Sidebar({ collapsed, onNavClick, isDrawer = false }) {
       style={{
         height: '100vh',
         position: isDrawer ? 'relative' : 'fixed',
-        left: 0,
+        insetInlineStart: 0,
         top: 0,
         bottom: 0,
         overflowY: 'auto',
