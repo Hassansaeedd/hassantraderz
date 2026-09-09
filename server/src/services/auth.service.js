@@ -10,8 +10,8 @@ import {
 
 const SALT_ROUNDS = 12;
 
-const signAccessToken = (userId, role) =>
-  jwt.sign({ userId, role }, process.env.JWT_ACCESS_SECRET, {
+const signAccessToken = (userId, role, username) =>
+  jwt.sign({ userId, role, username }, process.env.JWT_ACCESS_SECRET, {
     expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
   });
 
@@ -43,7 +43,7 @@ export const login = async (username, password, ipAddress) => {
   }
 
   // Generate tokens
-  const accessToken  = signAccessToken(user.id, user.role);
+  const accessToken  = signAccessToken(user.id, user.role, user.username);
   const refreshToken = signRefreshToken(user.id);
 
   // Persist refresh token (7 days expiry)

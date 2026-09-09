@@ -2,7 +2,9 @@
 import jwt from 'jsonwebtoken';
 import { AuthenticationError, TokenExpiredError } from '../utils/errors.js';
 
-export const authMiddleware = (req, res, next) => {
+import { prisma } from '../config/database.js';
+
+export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -12,7 +14,18 @@ export const authMiddleware = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    req.user = { userId: decoded.userId, role: decoded.role };
+    req.user = { userId: decoded.userId, role: decoded.role, username: decoded.username };
+
+    if (!req.user.username) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { username: true, role: true },
+      });
+      if (dbUser) {
+        req.user.username = dbUser.username;
+        if (!req.user.role) req.user.role = dbUser.role;
+      }
+    }
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') return next(new TokenExpiredError());

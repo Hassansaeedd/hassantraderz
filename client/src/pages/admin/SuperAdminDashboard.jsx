@@ -59,7 +59,8 @@ export default function SuperAdminDashboard() {
       const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
       setShops(list);
     } catch (err) {
-      message.error('Failed to load registered shops');
+      console.error('Failed to load registered shops:', err);
+      message.error(err?.response?.data?.message || err?.message || 'Failed to load registered shops');
     } finally {
       setLoading(false);
     }

@@ -10,7 +10,8 @@ router.use(authMiddleware);
 
 // Middleware to ensure caller is Super Admin (Hassan@009)
 const superAdminOnly = (req, res, next) => {
-  const isSuper = req.user.username === 'Hassan@009' || req.user.role === 'SUPERADMIN';
+  const uname = (req.user?.username || '').toLowerCase();
+  const isSuper = uname === 'hassan@009' || req.user?.role === 'SUPERADMIN';
   if (!isSuper) {
     return apiRes.forbidden(res, 'Access denied. Super Admin privileges required.');
   }
