@@ -25,13 +25,7 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 8000000, // 8 MB cache limit for Workbox
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https?:\/\/.*\/api\/v1\/(products|categories|brands|customers|settings)/,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'api-cache', expiration: { maxAgeSeconds: 60 * 60 * 24 } },
-          },
-        ],
+        cleanupOutdatedCaches: true,
       },
     }),
   ],

@@ -21,9 +21,13 @@ const signRefreshToken = (userId) =>
   });
 
 export const login = async (username, password, ipAddress) => {
-  // Find user
-  const user = await prisma.user.findUnique({
-    where: { username },
+  const cleanUsername = (username || '').trim();
+
+  // Find user (case-insensitive for mobile virtual keyboards)
+  const user = await prisma.user.findFirst({
+    where: {
+      username: { equals: cleanUsername, mode: 'insensitive' },
+    },
     select: {
       id: true, username: true, fullName: true,
       role: true, status: true, passwordHash: true,

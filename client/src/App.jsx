@@ -17,6 +17,19 @@ export default function App() {
     document.documentElement.lang = lang;
   }, [i18n.language]);
 
+  // Purge any stale Workbox API cache so mobile devices always get fresh live inventory
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((key) => {
+          if (key === 'api-cache' || key.includes('api')) {
+            caches.delete(key).catch(() => {});
+          }
+        });
+      }).catch(() => {});
+    }
+  }, []);
+
   // Sync offline queue when connection restores
   useEffect(() => {
     const handleOnline = async () => {

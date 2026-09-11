@@ -57,16 +57,35 @@ export async function bootstrapTenants() {
       });
     }
 
-    // 3. Migrate all existing unassigned Products to Muhammad Usman
-    const unassignedProducts = await prisma.product.count({
-      where: { userId: null },
+    // 3. Migrate all existing unassigned Products, Customers & Suppliers to Muhammad Usman
+    const usmanUsers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: 'usman', mode: 'insensitive' } },
+          { fullName: { contains: 'usman', mode: 'insensitive' } },
+        ],
+      },
     });
-    if (unassignedProducts > 0) {
-      await prisma.product.updateMany({
+    const targetUsmanId = usman?.id || usmanUsers[0]?.id;
+
+    if (targetUsmanId) {
+      const unassignedProducts = await prisma.product.count({ where: { userId: null } });
+      if (unassignedProducts > 0) {
+        await prisma.product.updateMany({
+          where: { userId: null },
+          data: { userId: targetUsmanId },
+        });
+        logger.info(`Safeguarded ${unassignedProducts} existing products for Muhammad Usman`);
+      }
+
+      await prisma.customer.updateMany({
         where: { userId: null },
-        data: { userId: usman.id },
+        data: { userId: targetUsmanId },
       });
-      logger.info(`Safeguarded ${unassignedProducts} existing products for Muhammad Usman`);
+      await prisma.supplier.updateMany({
+        where: { userId: null },
+        data: { userId: targetUsmanId },
+      });
     }
 
     // 4. Remove test 'Ali Khan' from polluting client shops
@@ -77,16 +96,6 @@ export async function bootstrapTenants() {
           { name: { contains: 'Ali Khan', mode: 'insensitive' } },
         ],
       },
-    });
-
-    // 5. Migrate any other unassigned customers/suppliers to Usman
-    await prisma.customer.updateMany({
-      where: { userId: null },
-      data: { userId: usman.id },
-    });
-    await prisma.supplier.updateMany({
-      where: { userId: null },
-      data: { userId: usman.id },
     });
 
     logger.info('Tenant data isolation & Muhammad Usman data preservation initialized successfully.');

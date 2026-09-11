@@ -34,7 +34,11 @@ export default function LoginPage() {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const res = await api.post('/auth/login', values);
+      const payload = {
+        ...values,
+        username: values.username?.trim(),
+      };
+      const res = await api.post('/auth/login', payload);
       const user = res.data.user;
       const token = res.data.accessToken;
       setAuth(user, token);
@@ -157,6 +161,9 @@ export default function LoginPage() {
                   prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
                   placeholder="Username"
                   autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   style={{ borderRadius: 10, height: 46 }}
                 />
               </Form.Item>

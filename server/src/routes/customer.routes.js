@@ -8,13 +8,36 @@ import { getPaginationParams, buildPaginationMeta } from '../utils/pagination.js
 const router = Router();
 router.use(authMiddleware);
 
+async function getCustomerTenantFilter(req) {
+  const uname = (req.user?.username || '').toLowerCase();
+  const isSuperAdmin = uname === 'hassan@009' || req.user?.role === 'SUPERADMIN';
+  if (isSuperAdmin) return {};
+
+  const isUsman = uname.includes('usman') || (req.user?.fullName || '').toLowerCase().includes('usman');
+  if (isUsman) {
+    const usmanUsers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: 'usman', mode: 'insensitive' } },
+          { fullName: { contains: 'usman', mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true },
+    });
+    const allUsmanIds = usmanUsers.map((u) => u.id);
+    if (!allUsmanIds.includes(req.user.userId)) allUsmanIds.push(req.user.userId);
+    return { OR: [{ userId: { in: allUsmanIds } }, { userId: null }] };
+  }
+  return { userId: req.user.userId };
+}
+
 router.get('/', asyncHandler(async (req, res) => {
-  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const search = req.query.search;
+  const tenantFilter = await getCustomerTenantFilter(req);
   const where = {
     isActive: true,
-    ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+    ...tenantFilter,
   };
   if (search) {
     where.AND = [

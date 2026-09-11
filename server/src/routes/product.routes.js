@@ -12,15 +12,53 @@ import { uploadProductImage } from '../middleware/upload.middleware.js';
 const router = Router();
 router.use(authMiddleware);
 
+async function getProductTenantFilter(req) {
+  const uname = (req.user?.username || '').toLowerCase();
+  const isSuperAdmin = uname === 'hassan@009' || req.user?.role === 'SUPERADMIN';
+  if (isSuperAdmin) {
+    return {};
+  }
+
+  // Check if current user is Muhammad Usman or part of Usman's primary shop
+  const isUsman = uname.includes('usman') || (req.user?.fullName || '').toLowerCase().includes('usman');
+
+  if (isUsman) {
+    // Find all Usman user accounts in the system to bridge multi-device and legacy accounts
+    const usmanUsers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: 'usman', mode: 'insensitive' } },
+          { fullName: { contains: 'usman', mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true },
+    });
+    const allUsmanIds = usmanUsers.map((u) => u.id);
+    if (!allUsmanIds.includes(req.user.userId)) {
+      allUsmanIds.push(req.user.userId);
+    }
+
+    return {
+      OR: [
+        { userId: { in: allUsmanIds } },
+        { userId: null },
+      ],
+    };
+  }
+
+  return { userId: req.user.userId };
+}
+
 // GET /products — list with search, filter, pagination
 router.get('/', asyncHandler(async (req, res) => {
   const { skip, take, page, limit } = getPaginationParams(req.query);
   const { search, categoryId, brandId, lowStock } = req.query;
-  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
+
+  const tenantFilter = await getProductTenantFilter(req);
 
   const where = {
     isActive: true,
-    ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+    ...tenantFilter,
   };
 
   if (search) {
@@ -55,11 +93,11 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // GET /products/low-stock
 router.get('/low-stock', asyncHandler(async (req, res) => {
-  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
+  const tenantFilter = await getProductTenantFilter(req);
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
-      ...(isSuperAdmin ? {} : { userId: req.user.userId }),
+      ...tenantFilter,
     },
     orderBy: { currentStock: 'asc' },
     take: 50,
@@ -72,19 +110,21 @@ router.get('/low-stock', asyncHandler(async (req, res) => {
 router.get('/search', asyncHandler(async (req, res) => {
   const q = req.query.q?.trim();
   if (!q) return apiRes.success(res, []);
-  const isSuperAdmin = req.user?.username === 'Hassan@009' || req.user?.role === 'SUPERADMIN';
+  const tenantFilter = await getProductTenantFilter(req);
+
+  const where = {
+    isActive: true,
+    ...tenantFilter,
+    OR: [
+      { nameEn: { contains: q, mode: 'insensitive' } },
+      { nameUr: { contains: q, mode: 'insensitive' } },
+      { sku: { contains: q, mode: 'insensitive' } },
+      { barcode: { contains: q, mode: 'insensitive' } },
+    ],
+  };
 
   const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      ...(isSuperAdmin ? {} : { userId: req.user.userId }),
-      OR: [
-        { nameEn: { contains: q } },
-        { nameUr: { contains: q } },
-        { sku: { contains: q } },
-        { barcode: q },
-      ],
-    },
+    where,
     take: 20,
     include: { category: { select: { nameEn: true, nameUr: true } }, brand: { select: { name: true } } },
   });
